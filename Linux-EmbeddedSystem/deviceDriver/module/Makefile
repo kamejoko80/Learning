@@ -1,0 +1,15 @@
+#! Makefile
+CC=/usr/local/arm-2009q3/bin/arm-none-linux-gnueabi-gcc
+ifneq ($(KERNELRELEASE),)
+obj-m	:= LEDdriver.o
+else
+KDIR	:= /home/dhp/Documents/embededExp/kernel-2.6 
+PWD	:=$(shell pwd)
+default:
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+clean:
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) clean
+endif
+
+
+

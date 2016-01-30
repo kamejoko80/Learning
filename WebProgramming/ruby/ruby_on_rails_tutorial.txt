@@ -1,0 +1,86 @@
+# update apt-get
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+# install required packages
+$ sudo apt-get install build-essential bison openssl\
+libreadline6 libreadline6-dev curl git-core zlib1g\
+zlib1g-dev libssl-dev libyaml-dev libsqlite3-0\
+libsqlite3-dev sqlite3 libxml2-dev libxslt-dev autoconf libc6-dev
+
+# install ruby
+$ wget http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.5.tar.gz
+$ tar xvfz ruby-2.1.5.tar.gz
+$ cd ruby-2.1.5/
+$ ./configure
+$ make
+$ sudo make install
+
+# when finish
+$ git --version
+$ ruby -v
+
+########################################
+# gem -v 告訴你 RubyGems 的版本
+# gem update --system 升級RubyGems的版本
+# gem install gem_name 安裝某個套件
+# gem list 列出安裝的套件
+# gem update gem_name 更新最新版本
+# gem update 更新所有你安裝的Gems
+# gem install -v x.x.x gemname 安裝特定版本
+# gem uninstall gem_name 反安裝
+#
+#
+# $ gem install gem_name --no-ri --no-rdoc
+# OR $ gem: --no-ri --no-rdoc
+
+# install Ruby on Rails
+$ sudo gem install rails --no-ri --no-rdoc
+
+# start with your first rails app
+$ mkdir project
+$ cd project
+$ rails new demo --skip-test-unit
+$ cd demo
+
+# 檔案/目錄         用途
+# Gemfile       設定Rails應用程式會使用哪些Gems套件
+# README        專案說明：你可以用來告訴其他人你的應用程式是做什麼用的，如何使用等等。
+# Rakefile      用來載入可以被命令列執行的一些Rake任務
+# app/          放Controllers、Models和Views檔案，接下來的內容主要都在這個目錄。
+# config/       應用程式設定檔、路由規則、資料庫設定等等
+# config.ru     用來啟動應用程式的Rack伺服器設定檔
+# db/           資料庫的結構綱要
+# doc/          用來放你的文件
+# lib/          放一些自定的Module和類別檔案
+# log/          應用程式的Log記錄檔
+# public/       唯一可以在網路上看到的目錄，這是你的圖檔、JavaScript、CSS和其他靜態檔案擺放的地方
+# bin/          放rails這個指令和放其他的script指令
+# test/         單元測試、fixtures及整合測試等程式
+# tmp/          暫時性的檔案
+# vendor/       用來放第三方程式碼外掛的目錄
+
+# install bundle
+$ bundle install
+
+# start rails server
+$ cd project/demo
+$ bin/rails server
+
+# browse http://localhost:3000
+$ rails generate controller welcome
+
+# add a line in config/routes.rb
+Rails::Application.routes.draw do
+  get "welcom/say_hello" => "welcome#say"
+  # ...
+end
+
+# add a line in app/controllers/welcome_controller.rb
+class WelcomeController < ApplicationController
+  def say
+  end
+end
+
+
+

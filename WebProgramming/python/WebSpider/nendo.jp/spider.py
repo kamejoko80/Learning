@@ -43,7 +43,7 @@ def get_menu(url):
     soup = get_soup(url)
     menu = []
     for menu_list in soup.find_all('a',rel = 'bookmark'):
-        name = menu_list.string
+        name = menu_list.string.replace('/',',')
         address = menu_list['href']
         menu.append([name, address])
     return menu

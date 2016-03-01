@@ -4,6 +4,8 @@
 
 import requests
 from bs4 import BeautifulSoup
+import getpass
+
 
 
 def download_page(url):
@@ -17,4 +19,7 @@ def download_page(url):
 
 
 if __name__ == "__main__":
-    
+    GOOGLE_PHOTOS_URL = 'https://photos.google.com'
+    email = raw_input("input your email address: ")
+    password = getpass.getpass("input your password: ")
+

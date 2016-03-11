@@ -8,6 +8,7 @@ import bs4
 import urllib
 import urllib2
 import requests
+import imghdr
 
 def get_soup(url, tries = 1):
     '''
@@ -47,17 +48,12 @@ def get_images(soup):
         for img in img_tags:
             img_url = img.get('data-src')
             if img_url != None:
-                if img_url.endswith("png"):
-                    filename = os.path.join(save_path, title + str(counter) + '.png')
-                elif img_url.endswith("gif"):
-                    filename = os.path.join(save_path, title + str(counter) + '.gif')
-                elif img_url.endswith("jpeg") or img_url.endswith("jpg"):
-                    filename = os.path.join(save_path, title + str(counter) + '.jpg')
-                else:
-                    filename = os.path.join(save_path, title + str(counter))
-
-                if not os.path.exists(filename):
+                filename = os.path.join(save_path, title + str(counter))
+                # TODO: check exists 
+                if not os.path.exists(filename + '.jpeg'):
                     urllib.urlretrieve(img_url, filename)
+                    new_filename = filename + '.' + imghdr.what(filename)
+                    os.rename(filename, new_filename)
                     print "......%d" % counter
                 else:
                     print title + str(counter), "has saved, pass",

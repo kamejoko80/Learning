@@ -7,9 +7,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     // open the video camera no. 0
-    //VideoCapture cap(0);
+    VideoCapture cap(0);
     // open the video file
-    VideoCapture cap("./samples/data/768x576.avi");
+    //VideoCapture cap("./samples/data/768x576.avi");
 
     if (!cap.isOpened())
     {
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
         Mat frame;
 
         // read a new frame from video
+        // cap>>frame;
         bool bSuccess = cap.read(frame);
 
         if (!bSuccess)

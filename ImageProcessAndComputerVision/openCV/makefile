@@ -1,4 +1,4 @@
-PROG = savingImagesVideos 
+PROG = mouse-event 
 SRC = ${PROG:%=%.cpp}
 TARGET = $(PROG)
 

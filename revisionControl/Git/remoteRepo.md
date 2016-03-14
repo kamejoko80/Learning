@@ -1,18 +1,18 @@
 # remote Repo
 
-*$ git remote
+* $ git remote
 
-*$ git remote add [shortname] [url]
+* $ git remote add [shortname] [url]
 
-*$ git fetch [remote-name]
+* $ git fetch [remote-name]
 
-*$ git push origin master
+* $ git push origin master
 
-*$ git pull
+* $ git pull
 
-*$ git remote show origin
+* $ git remote show origin
 
-*$ git remote rename old new
+* $ git remote rename old new
 
-*$ git remote rm remotename
+* $ git remote rm remotename
 

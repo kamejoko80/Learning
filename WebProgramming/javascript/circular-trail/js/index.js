@@ -35,22 +35,22 @@ function drawParticle(o){
 }
 
 function Draw() {
-	frames+=.5;
+	frames += 1;
     ctx.clearRect(0, 0, cw, ch);
 	var n = p.length;
 	
 	for( var i = 0; i < n; i++){
 		
-	var o = p[(~~frames-i) % n];
+	    var o = p[(~~frames-i) % n];
 	
-	o.r = 2 + i/9;
-	o.R = r+ i/2 * o.rnd;
-	o.x = cx + o.R * Math.cos(o.a * rad);
-	o.y = cy + o.R * Math.sin(o.a * rad);
-	var l = ~~(3*n/4);
-	o.alpha = (l - i)/l;
+	    o.r = 2 + i/9;
+	    o.R = r+ i/2 * o.rnd;
+	    o.x = cx + o.R * Math.cos(o.a * rad);
+	    o.y = cy + o.R * Math.sin(o.a * rad);
+	    var l = ~~(3*n/4);
+	    o.alpha = (l - i)/l;
 		
-    drawParticle(o);
+        drawParticle(o);
 	}  
     window.requestAnimationFrame(Draw);
 }
@@ -60,7 +60,4 @@ window.requestAnimationFrame(Draw);
 function rnd() {// a @tmrDevelops function
   Math.seed = (Math.seed * 108013 + 2531011) & 0xffffffff;
   return Math.abs(Math.seed >> 16) / 32869;
-}
-function randomIntFromInterval(mn, mx) {
-  return ~~(rnd() * (mx - mn + 1) + mn);
 }

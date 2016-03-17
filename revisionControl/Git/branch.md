@@ -18,7 +18,7 @@ $ git merge test
 
 * $ git checkout -b serverfix origin/serverfix
 
-* Remove the branch on server
+* Remove the branch on server  
 $ git push origin :serverfix
 
 

@@ -1,6 +1,5 @@
-1. background subtraction using single gaussian model
-reference£º
-http://underthehood.blog.51cto.com/2531780/484191/
+1. background subtraction using single gaussian model reference  
+http://underthehood.blog.51cto.com/2531780/484191/  
 a better model: Gaussian mixture models (GMM)
 
 2. HSV histogram

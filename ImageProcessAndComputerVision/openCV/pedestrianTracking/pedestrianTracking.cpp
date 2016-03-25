@@ -43,22 +43,20 @@ int main()
 		img2 = imread(str_in2.str(), 1);
 		
 		int64 t = getTickCount();
+		// compute the disparity between img1 and img2
 		compute(img1, img2, disp);
 		t = getTickCount() - t;
-		
+		cout << "Run time(s):" << t / getTickFrequency() << endl;
 
-		test_show_disparity(disp);
+		//test_show_disparity(disp);
 
 
 		// compute the depth
-		//Scalar::all(0): initialize as all 0 matrix
-		//Mat depth = Mat(Size(disp.rows, disp.cols), CV_32FC1, Scalar::all(0));
+		Mat depth;
+		disp.convertTo(depth, CV_32FC3);
+		// depth = 0.119 * 211 / (disp / 16)
+		depth = 0.119 * 211.0 * 16.0 / depth;
 
-		//for (int j = 0; j < disp.rows * disp.cols; j++)
-		//{
-		//	float a = abs(*(disp.data + j) / 16);
-		//	*(depth.data + j) = 0.119 * 211 /a;
-		//}
 		//cout << float(*(depth.data + 10));
 
 
@@ -68,16 +66,9 @@ int main()
 		//string s = string(str_out.str());
 		//saveDisp(s.c_str(), disp);
 
-		cout << "Run time(s):" << t / getTickFrequency() << endl;
+		
 		waitKey(1);
 	}
 	return 0;
 }
 
-void test_show_disparity(Mat disp)
-{
-	Mat disp8;
-	namedWindow("disparity", 1);
-	normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
-	imshow("disparity", disp8);
-}

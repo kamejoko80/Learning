@@ -1,0 +1,12 @@
+# This is comment, which is being ignored by git
+
+*~
+*.[oa]		# ignore all files end with .o OR .a
+*py[co]
+*.class     # compiled java file
+*.asv       # autosaved matlab file
+
+/TODO		# ignore all files in /TODO
+
+doc/*.txt	# ignore all files end with .txt under doc, but not include doc/server/arch.txt
+

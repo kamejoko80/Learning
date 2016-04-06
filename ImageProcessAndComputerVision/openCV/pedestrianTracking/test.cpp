@@ -12,6 +12,28 @@ void test_show_disparity(Mat disp)
 	imshow("disparity", disp8);
 }
 
+void test_show_fg(Mat fg)
+{
+	namedWindow("disparity", 1);
+	imshow("disparity", fg);
+}
+
+void test_show_contours(vector<vector<Point>> contours, vector<Vec4i> hierarchy, Mat bg_img)
+{
+	for (int m = 0; m < contours.size(); m++)
+	{
+		Scalar color = Scalar(0, 0, 255);
+		drawContours(bg_img, contours, m, color, 2, 8, hierarchy, 0, Point());
+	}
+	cvNamedWindow("fg_contours");
+	imshow("fg_contours", bg_img);
+
+	cvWaitKey(10);
+}
+
+
+
+
 void test_mat_operation()
 {
 	//Mat a(3, 5, CV_32FC1, Scalar(1));

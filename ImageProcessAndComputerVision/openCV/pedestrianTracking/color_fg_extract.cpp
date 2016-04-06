@@ -48,42 +48,26 @@ void extract()
 		for (int j = 0; j < width; j++)
 		{
 			mean = cur_bg1.at<uchar>(i, j);
+			var = cur_bg2.at<uchar>(i, j);
 			diff = double(frame_gray.at<uchar>(i, j)) - mean;
 			if (abs(diff) <= defaultVarTh * defaultVar)
 			{
 				fg.at<uchar>(i, j) = 0;
 				
-				//Vec3b pixel;
-				//pixel[0] = 0;
-				//pixel[1] = 0;
-				//pixel[2] = 0;
-				//fg_color.at<Vec3b>(i, j) = pixel;
-			}
-			else
-			{
-				fg.at<uchar>(i, j) = 255;
-				//fg_color.at<Vec3b>(i, j) = (cur_frame.at<Vec3b>(i, j));
-			}
-		}
-	}
-
-	//background update
-	for (i = 0; i < height; i++)
-	{
-		for (j = 0; j < width; j++)
-		{
-			mean = cur_bg1.at<uchar>(i, j);
-			var = cur_bg2.at<uchar>(i, j);
-			diff = double(frame_gray.at<uchar>(i, j)) - mean;
-			if (abs(diff) <= defaultVarTh*defaultVar)
-			{
+				//background update
 				cur_bg1.at<uchar>(i, j) = cur_bg1.at<uchar>(i, j) + alpha*diff;
 				mean = cur_bg2.at<uchar>(i, j);
 				diff = double(frame_gray.at<uchar>(i, j)) - mean;
 				cur_bg2.at<uchar>(i, j) = sqrt(var*var + alpha*(diff*diff - var*var));
 			}
+			else
+			{
+				fg.at<uchar>(i, j) = 255;
+			}
 		}
 	}
+
+	
 
 	cvNamedWindow("fg");
 	imshow("fg", cur_bg1);

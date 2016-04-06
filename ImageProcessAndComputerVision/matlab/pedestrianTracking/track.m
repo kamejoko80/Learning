@@ -1,35 +1,48 @@
 clear all;
-filepath='..\..\..\..\..\data\pedestrainTrackingFrame\';
+framepath = '..\..\..\..\..\data\pedestrainTrackingFrame\';
+dispPath = '..\..\..\..\..\data\pedestrainTrackingFrame\disp290x202\';
 
-frame = imread([filepath 'right' num2str(0) '.png']);
+frame = imread([framepath 'right' num2str(0) '.png']);
 frame_gray = rgb2gray(frame);
-[height,width] = size(frame_gray);
-
-cur_bg = zeros(height,width,2);
-cur_bg(:,:,1) = double(frame_gray); % init mean
-cur_bg(:,:,2) = 20;  % init Standard Deviation ... not Variance
+% [height,width] = size(frame_gray);
+% bg_mean = double(frame_gray); % init mean
+% bg_stddev = ones(height, width) * 20; % init Standard Deviation (sigma) ... not Variance
 last_num = 0;
 cur_num = 0;
-    
+
+disp = load([dispPath 'disp' num2str(1) '.txt']);
+disp = (abs(disp) ./ max(max(abs(disp)))) .* 255;
+[height,width] = size(disp);
+bg = uint8(disp);
+
 %kalman initialization
 P = [100 0 0 0;0 100 0 0;0 0 100 0;0 0 0 100];
 
 % n is the index of frames
-for n = 1:203
+for n = 164:203
     % start timer
     tic
-    cur_frame = imread([filepath 'right' num2str(n) '.png']);
-    [L,m,new_bg,fg,fg_color] = fg_extract(cur_bg,cur_frame,height,width);
-    cur_bg = new_bg;
+    cur_frame = imread([framepath 'right' num2str(n) '.png']);
+    disp = load([dispPath 'disp' num2str(n) '.txt']);
+    disp = (abs(disp) ./ max(max(abs(disp)))) .* 255;
+    disp = uint8(disp);
+    %[L, m, bg_mean, bg_stddev, fg] = fg_extract(bg_mean, bg_stddev, cur_frame, height, width);
+    [L, m, fg, fg_disp] = fg_extract_disp(bg, disp);
+    
+    fg_color = ones(height, width, 3);
+    fg_color(:,:,1) = cur_frame(:,:,1) .* uint8(fg);
+    fg_color(:,:,2) = cur_frame(:,:,2) .* uint8(fg);
+    fg_color(:,:,3) = cur_frame(:,:,3) .* uint8(fg);
     
     figure(1)
-    imshow(cur_frame);
-    figure(2)
-    imshow(uint8(fg_color));
+    imshow(cur_frame); hold on;
     box = regionprops(L, 'BoundingBox');
     for i=1:m
         rectangle('position', box(i).BoundingBox, 'edgecolor', 'r');       
     end
+    
+    figure(2)
+    imshow(edge(uint8(fg_disp), 'sobel'));
     
     if n==1
         if m>0
@@ -62,5 +75,6 @@ for n = 1:203
             text(x-5,y-5,num2str(last_obj(i).No),'Color','r');
         end
     end
+    
     toc
 end

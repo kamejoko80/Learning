@@ -42,6 +42,8 @@ int main()
 		if (i == 1)
 		{
 			disp.copyTo(bg);
+			// jump to frame 164, for observing the side by side walking pedestrian
+			i = 164;
 		}
 		else
 		{

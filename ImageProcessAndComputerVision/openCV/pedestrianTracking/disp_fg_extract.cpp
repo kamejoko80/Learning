@@ -16,7 +16,7 @@ void disp_fg_extract(Mat& disp, Mat& bg)
 
 	int64 t = getTickCount();
 
-    threshold(disp, disp, 30, 255, THRESH_TOZERO);
+    threshold(diff, diff, 30, 255, THRESH_TOZERO);
 
 	normalize(diff, fg, 0, 255, CV_MINMAX, CV_8U);
 	// test_show_fg(fg);

@@ -24,6 +24,9 @@ void test_show_contours(vector<vector<Point>> contours, vector<Vec4i> hierarchy,
 	{
 		Scalar color = Scalar(0, 0, 255);
 		drawContours(bg_img, contours, m, color, 2, 8, hierarchy, 0, Point());
+	
+		Rect roi = boundingRect(contours[m]);
+		rectangle(bg_img, roi, (255, 255, 255), 3);
 	}
 	cvNamedWindow("fg_contours");
 	imshow("fg_contours", bg_img);

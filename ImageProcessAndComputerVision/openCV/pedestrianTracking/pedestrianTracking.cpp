@@ -42,6 +42,9 @@ int main()
 		if (i == 1)
 		{
 			disp.copyTo(bg);
+			bg = 255 - bg;
+			threshold(bg, bg, 128, 255, THRESH_TRUNC);
+			bg = 255 - bg;
 			// jump to frame 164, for observing the side by side walking pedestrian
 			i = 164;
 		}

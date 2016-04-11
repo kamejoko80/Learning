@@ -10,6 +10,7 @@ void test_show_disparity(Mat disp)
 	namedWindow("disparity", 1);
 	normalize(disp, disp8, 0, 255, CV_MINMAX, CV_8U);
 	imshow("disparity", disp8);
+	cvWaitKey(1);
 }
 
 void test_show_fg(Mat fg)
@@ -24,14 +25,11 @@ void test_show_contours(vector<vector<Point>> contours, vector<Vec4i> hierarchy,
 	{
 		Scalar color = Scalar(0, 0, 255);
 		drawContours(bg_img, contours, m, color, 2, 8, hierarchy, 0, Point());
-	
-		Rect roi = boundingRect(contours[m]);
-		rectangle(bg_img, roi, (255, 255, 255), 3);
 	}
 	cvNamedWindow("fg_contours");
 	imshow("fg_contours", bg_img);
 
-	cvWaitKey(10);
+	cvWaitKey(1);
 }
 
 

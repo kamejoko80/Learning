@@ -1039,7 +1039,7 @@ static struct i2c_board_info front_camera_i2c_boardinfo[] = {
 #include <linux/i2c.h>
 static struct i2c_board_info mipi_i2c_camera = {
 
-        I2C_BOARD_INFO(MODULE_NAME,0X30),
+        I2C_BOARD_INFO(MODULE_NAME,0X78>>1),
 
 };
 

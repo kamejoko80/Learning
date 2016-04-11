@@ -1803,7 +1803,7 @@ static int ov5645_video_probe(struct i2c_client *client)
 	int ret;
 	u8 id_high, id_low;
 	u16 id;
-//  added by yang 
+//  added by yang and hoping 
         
         printk(KERN_ALERT "#####: ov5645 POWER UP...");
         
@@ -1843,7 +1843,7 @@ static int ov5645_video_probe(struct i2c_client *client)
 	ret = reg_read(client, 0x300a, &id_high);
 	if (ret < 0)
     {
-        printk("OV5645 read error!!!!!!!!!!!!!!!\n");
+        printk("OV5640 read error!!!!!!!!!!!!!!!\n");
 		return ret;
     }
 
@@ -1852,15 +1852,15 @@ static int ov5645_video_probe(struct i2c_client *client)
 	ret = reg_read(client, 0x300b, &id_low);
 	if (ret < 0)
     {
-        printk("OV5645 read error!!!!!!!!!!!!!!!\n");
+        printk("OV5640 read error!!!!!!!!!!!!!!!\n");
 		return ret;
     }
 
 	id |= id_low;
 
-	printk("OV5645 Chip ID 0x%04x detected\n", id);
+	printk("OV5640 Chip ID 0x%04x detected\n", id);
 
-	if (id != 0x5642)
+	if (id != 0x5640)
 		return -ENODEV;
 
 	return 0;

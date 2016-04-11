@@ -37,6 +37,7 @@
 #include <mach/nxp-hdmi-cec.h>
 #endif
 
+
 /*------------------------------------------------------------------------------
  * BUS Configure
  */
@@ -110,7 +111,7 @@ struct nxp_cpufreq_plat_data dfs_plat_data = {
 };
 */
 
-#define HIGH_PERFORMANCE 0//define by rpdzkj jeff
+#define HIGH_PERFORMANCE 1//define by rpdzkj jeff
 
 static unsigned long dfs_freq_table[][2] = {
 #if HIGH_PERFORMANCE
@@ -747,7 +748,8 @@ static struct platform_device *i2c_devices[] = {
 static int is_camera_set_clock = 0;
 static int camera_common_set_clock(ulong clk_rate)
 {
-	if(is_camera_set_clock)
+    printk(KERN_ALERT "#####camera set clock");
+    if(is_camera_set_clock)
 		return 0;
 
     PM_DBGOUT("%s: %d\n", __func__, (int)clk_rate);
@@ -764,6 +766,7 @@ static int camera_common_set_clock(ulong clk_rate)
 static bool is_camera_port_configured = false;
 static void camera_common_vin_setup_io(int module, bool force)
 {
+    printk(KERN_ALERT "#####camera port config");
     if (!force && is_camera_port_configured)
         return;
     else {
@@ -793,7 +796,7 @@ static void camera_common_vin_setup_io(int module, bool force)
 
             { PAD_GPIO_A + 30, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  0, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_B +  2, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  4, NX_GPIO_PADFUNC_1 },
-            //camera 与 usb 引脚冲突
+            //camera \D3\EB usb \D2\FD\BD懦\E5突
             { PAD_GPIO_B +  6, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  8, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_B +  9, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B + 10, NX_GPIO_PADFUNC_1 },
 #endif
@@ -816,7 +819,7 @@ static void camera_common_vin_setup_io(int module, bool force)
     }
 }
 
-static bool camera_power_enabled = false;
+static bool camera_power_enabled = true;
 // fix for dronel
 #if 0
 static void camera_power_control(int enable)
@@ -869,7 +872,7 @@ static void camera_power_control(int enable)
 static void camera_power_control(int enable)
 {
     struct regulator *cam_core_18V = NULL;
-
+    
     if (enable && camera_power_enabled)
         return;
     if (!enable && !camera_power_enabled)
@@ -893,21 +896,22 @@ static void camera_power_control(int enable)
 }
 #endif
 
-static bool is_back_camera_enabled = false;
-static bool is_back_camera_power_state_changed = false;
-static bool is_front_camera_enabled = false;
-static bool is_front_camera_power_state_changed = false;
+static bool is_mipi_camera_enabled = false;
+static bool is_mipi_camera_power_state_changed = false;
+//static bool is_front_camera_enabled = false;
+//static bool is_front_camera_power_state_changed = false;
 
-static int front_camera_power_enable(bool on);
-static int back_camera_power_enable(bool on)
+//static int front_camera_power_enable(bool on);
+static int mipi_camera_power_enable(bool on)
 {
     unsigned int io = CFG_IO_CAMERA_BACK_POWER_DOWN;
     unsigned int reset_io = CFG_IO_CAMERA_RESET;
-    PM_DBGOUT("%s: is_back_camera_enabled %d, on %d\n", __func__, is_back_camera_enabled, on);
+    printk(KERN_ALERT "######enter camera power_enable func");
+    PM_DBGOUT("%s: is_mipi_camera_enabled %d, on %d\n", __func__, is_,mipi_camera_enabled, on);
     if (on) {
-        front_camera_power_enable(0);
-        if (!is_back_camera_enabled) {
-            camera_power_control(1);
+        //front_camera_power_enable(0);
+        if (!is_mipi_camera_enabled) {
+            //camera_power_control(1);
             /* PD signal */
             nxp_soc_gpio_set_out_value(io, 0);
             nxp_soc_gpio_set_io_dir(io, 1);
@@ -927,47 +931,39 @@ static int back_camera_power_enable(bool on)
             nxp_soc_gpio_set_out_value(reset_io, 1);
             /* mdelay(100); */
             mdelay(1);
-            is_back_camera_enabled = true;
-            is_back_camera_power_state_changed = true;
+            is_mipi_camera_enabled = true;
+            is_mipi_camera_power_state_changed = true;
         } else {
-            is_back_camera_power_state_changed = false;
+            is_mipi_camera_power_state_changed = false;
         }
     } else {
-        if (is_back_camera_enabled) {
+        if (is_mipi_camera_enabled) {
             nxp_soc_gpio_set_out_value(io, 1);
             nxp_soc_gpio_set_out_value(reset_io, 0);
-            is_back_camera_enabled = false;
-            is_back_camera_power_state_changed = true;
+            is_mipi_camera_enabled = false;
+            is_mipi_camera_power_state_changed = true;
         } else {
             nxp_soc_gpio_set_out_value(io, 1);
             nxp_soc_gpio_set_io_dir(io, 1);
             nxp_soc_gpio_set_io_func(io, nxp_soc_gpio_get_altnum(io));
             nxp_soc_gpio_set_out_value(io, 1);
-            is_back_camera_power_state_changed = false;
+            is_mipi_camera_power_state_changed = false;
         }
 
-        if (!(is_back_camera_enabled || is_front_camera_enabled)) {
-            camera_power_control(0);
-        }
+       // if (!(is_mipi_camera_enabled || is_front_camera_enabled)) {
+       //     camera_power_control(0);
+       // }
     }
 
     return 0;
 }
 
-static bool back_camera_power_state_changed(void)
+static bool mipi_camera_power_state_changed(void)
 {
-    return is_back_camera_power_state_changed;
+    return is_mipi_camera_power_state_changed;
 }
 
-static struct i2c_board_info back_camera_i2c_boardinfo[] = {
-    {
-	
-        //I2C_BOARD_INFO("SP2518", 0x60>>1),
-        I2C_BOARD_INFO("SP2518", 0x1f),
-        //I2C_BOARD_INFO("SP0838", 0x18),
-    },
-};
-
+/* modified by yang
 static int front_camera_power_enable(bool on)
 {
     unsigned int io = CFG_IO_CAMERA_FRONT_POWER_DOWN;
@@ -977,28 +973,28 @@ static int front_camera_power_enable(bool on)
         back_camera_power_enable(0);
         if (!is_front_camera_enabled) {
             camera_power_control(1);
-            /* First RST signal to low */
+            // First RST signal to low 
             nxp_soc_gpio_set_out_value(reset_io, 1);
             nxp_soc_gpio_set_io_dir(reset_io, 1);
             nxp_soc_gpio_set_io_func(reset_io, nxp_soc_gpio_get_altnum(io));
             nxp_soc_gpio_set_out_value(reset_io, 0);
             mdelay(1);
 
-            /* PWDN signal High to Low */
+            // PWDN signal High to Low 
             nxp_soc_gpio_set_out_value(io, 0);
             nxp_soc_gpio_set_io_dir(io, 1);
             nxp_soc_gpio_set_io_func(io, nxp_soc_gpio_get_altnum(io));
             nxp_soc_gpio_set_out_value(io, 1);
             camera_common_set_clock(24000000);
             mdelay(10);
-            /* mdelay(1); */
+            // mdelay(1); 
             nxp_soc_gpio_set_out_value(io, 0);
-            /* mdelay(10); */
+            // mdelay(10); 
             mdelay(10);
 
-            /* RST signal  to High */
+            // RST signal  to High 
             nxp_soc_gpio_set_out_value(reset_io, 1);
-            /* mdelay(100); */
+            // mdelay(100); 
             mdelay(5);
 
             is_front_camera_enabled = true;
@@ -1022,6 +1018,9 @@ static int front_camera_power_enable(bool on)
 
     return 0;
 }
+*/
+
+/* modified by yang
 
 static bool front_camera_power_state_changed(void)
 {
@@ -1033,29 +1032,44 @@ static struct i2c_board_info front_camera_i2c_boardinfo[] = {
         I2C_BOARD_INFO("SP0838", 0x18),
     },
 };
+*/
 
-static struct nxp_v4l2_i2c_board_info sensor[] = {
-    {
-        .board_info = &back_camera_i2c_boardinfo[0],
-        .i2c_adapter_id = 0,
-    },
+// added by yang 2016.4
+#define MODULE_NAME "OV5645"
+#include <linux/i2c.h>
+static struct i2c_board_info mipi_i2c_camera = {
+
+        I2C_BOARD_INFO(MODULE_NAME,0X30),
+
+};
+
+static struct nxp_v4l2_i2c_board_info sensor = {
+   // {
+    //   modified by yang
+         .board_info = &mipi_i2c_camera,
+         .i2c_adapter_id = 0,
+    //},
+
+    /*  modified by yang
+        add another camera here  
     {
         .board_info = &front_camera_i2c_boardinfo[0],
         .i2c_adapter_id = 0,
     },
+    */
 };
 
 #if 1
-static struct nxp_capture_platformdata capture_plat_data[] = {
-    {
-        /* back_camera 656 interface */
-        .module = 0,//数据使用通道 0，即 VIP0 
-        .sensor = &sensor[0], // sensor[0]:2518; sensor[1]:0838 
+static struct nxp_capture_platformdata capture_plat_data = {
+    //{
+        /* mipi_camera 656 interface */
+        .module = 0, 
+        .sensor = &sensor, // sensor[0]:mipi; sensor[1]:dvp 
         .type = NXP_CAPTURE_INF_PARALLEL,
         .parallel = {
             /* for 656 */
-            .is_mipi        = false,
-            .external_sync  = true,
+            .is_mipi        = true,
+            .external_sync  = false,
             .h_active       = 640,
             .h_frontporch   = 1,
             .h_syncwidth    = 1,
@@ -1070,8 +1084,8 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
             .interlace      = false,
             .clk_rate       = 24000000,
             .late_power_down = true,
-            .power_enable   = back_camera_power_enable,
-            .power_state_changed =back_camera_power_state_changed, 
+            .power_enable   = mipi_camera_power_enable,
+            .power_state_changed =mipi_camera_power_state_changed, 
             .set_clock      = camera_common_set_clock,
             .setup_io       = camera_common_vin_setup_io,
         },
@@ -1079,9 +1093,11 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
             .start_delay_ms = 0,
             .stop_delay_ms  = 0,
         },
-    },
+    //},
+    
+/*  modified by yang
     {
-        /* front_camera 601 interface */
+        // front_camera 601 interface 
         .module = 0,
         .sensor = &sensor[1],	//  sensor[0]:2518  sensor[1] : 0838 ;
         .type = NXP_CAPTURE_INF_PARALLEL,
@@ -1112,7 +1128,8 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
             .stop_delay_ms  = 0,
         },
     },
-    { 0, NULL, 0, },
+ */   
+    //{ 0, NULL, 0, },
 };
 #else  // front ok 1106
 static struct nxp_capture_platformdata capture_plat_data[] = {
@@ -1512,7 +1529,7 @@ static struct nxp_out_platformdata out_plat_data = {
 };
 
 static struct nxp_v4l2_platformdata v4l2_plat_data = {
-    .captures = &capture_plat_data[0],
+    .captures = &capture_plat_data,
     .out = &out_plat_data,
 };
 

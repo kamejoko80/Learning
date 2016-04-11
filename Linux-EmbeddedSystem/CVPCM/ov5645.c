@@ -31,7 +31,12 @@
 #include <media/v4l2-ctrls.h>
 #include <linux/delay.h>
 
+#include <linux/regulator/consumer.h>
+#include <mach/soc.h>
+
 #define MODULE_NAME "OV5645"
+#include <mach/gpio.h>
+#include <mach/platform.h>
 
 // TODO : move this to PLAT/device.c
 #if 0
@@ -1798,7 +1803,42 @@ static int ov5645_video_probe(struct i2c_client *client)
 	int ret;
 	u8 id_high, id_low;
 	u16 id;
+//  added by yang 
+        
+        printk(KERN_ALERT "#####: ov5645 POWER UP...");
+        
+// power up
+        struct regulator *camera_power_1p5V = NULL;
+        struct regulator *camera_power_2p8V = NULL;
 
+        gpio_request(CAMERA_PD0,"CAMERA_PD0");
+        gpio_request(CAMERA_RST,"CAMERA_RST");
+        
+        gpio_direction_output(CAMERA_PD0, 1);
+        mdelay(5);
+
+        camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
+        camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
+
+        regulator_set_voltage(camera_power_2p8V, 2800, 2800);
+        regulator_set_voltage(camera_power_1p5V, 1500, 1500);
+        printk(KERN_ALERT "#####: camera_power_1.5V...");
+        regulator_enable(camera_power_2p8V);
+        mdelay(5);
+        regulator_enable(camera_power_1p5V);
+// set CLK
+        nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
+      
+// reset
+        mdelay(50);
+        gpio_direction_output(CAMERA_PD0, 0);
+        mdelay(50);
+        gpio_direction_output(CAMERA_RST, 1);
+        mdelay(50);
+
+	gpio_free(CAMERA_PD0);
+        gpio_free(CAMERA_RST);
+//  end
 	/* Read sensor Model ID */
 	ret = reg_read(client, 0x300a, &id_high);
 	if (ret < 0)

@@ -1820,21 +1820,21 @@ static int ov5645_video_probe(struct i2c_client *client)
         camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
         camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
 
-        regulator_set_voltage(camera_power_2p8V, 2800, 2800);
-        regulator_set_voltage(camera_power_1p5V, 1500, 1500);
+        regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
+        regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);
         printk(KERN_ALERT "#####: camera_power_1.5V...");
         regulator_enable(camera_power_2p8V);
         mdelay(5);
         regulator_enable(camera_power_1p5V);
-// set CLK
-        nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
       
 // reset
-        mdelay(50);
+        mdelay(10);
         gpio_direction_output(CAMERA_PD0, 0);
-        mdelay(50);
+// set CLK
+        nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
+        mdelay(5);
         gpio_direction_output(CAMERA_RST, 1);
-        mdelay(50);
+        mdelay(30);
 
 	gpio_free(CAMERA_PD0);
         gpio_free(CAMERA_RST);

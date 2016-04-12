@@ -898,8 +898,8 @@ static void camera_power_control(int enable)
 
 static bool is_mipi_camera_enabled = false;
 static bool is_mipi_camera_power_state_changed = false;
-//static bool is_front_camera_enabled = false;
-//static bool is_front_camera_power_state_changed = false;
+static bool is_dvp_camera_enabled = false;
+static bool is_dvp_camera_power_state_changed = false;
 
 //static int front_camera_power_enable(bool on);
 static int mipi_camera_power_enable(bool on)
@@ -963,23 +963,17 @@ static bool mipi_camera_power_state_changed(void)
     return is_mipi_camera_power_state_changed;
 }
 
-/* modified by yang
-static int front_camera_power_enable(bool on)
+// modified by yang and hoping
+static int dvp_camera_power_enable(bool on)
 {
     unsigned int io = CFG_IO_CAMERA_FRONT_POWER_DOWN;
     unsigned int reset_io = CFG_IO_CAMERA_RESET;
-    PM_DBGOUT("%s: is_front_camera_enabled %d, on %d\n", __func__, is_front_camera_enabled, on);
+    printk(KERN_ALERT "######enter camera power_enable func");
+    PM_DBGOUT("%s: is_dvp_camera_enabled %d, on %d\n", __func__, is_dvp_camera_enabled, on);
     if (on) {
-        back_camera_power_enable(0);
-        if (!is_front_camera_enabled) {
-            camera_power_control(1);
-            // First RST signal to low 
-            nxp_soc_gpio_set_out_value(reset_io, 1);
-            nxp_soc_gpio_set_io_dir(reset_io, 1);
-            nxp_soc_gpio_set_io_func(reset_io, nxp_soc_gpio_get_altnum(io));
-            nxp_soc_gpio_set_out_value(reset_io, 0);
-            mdelay(1);
-
+        //back_camera_power_enable(0);
+        if (!is_dvp_camera_enabled) {
+            //camera_power_control(1);
             // PWDN signal High to Low 
             nxp_soc_gpio_set_out_value(io, 0);
             nxp_soc_gpio_set_io_dir(io, 1);
@@ -991,48 +985,45 @@ static int front_camera_power_enable(bool on)
             nxp_soc_gpio_set_out_value(io, 0);
             // mdelay(10); 
             mdelay(10);
-
             // RST signal  to High 
             nxp_soc_gpio_set_out_value(reset_io, 1);
             // mdelay(100); 
             mdelay(5);
 
-            is_front_camera_enabled = true;
-            is_front_camera_power_state_changed = true;
+            is_dvp_camera_enabled = true;
+            is_dvp_camera_power_state_changed = true;
         } else {
-            is_front_camera_power_state_changed = false;
+            is_dvp_camera_power_state_changed = false;
         }
     } else {
-        if (is_front_camera_enabled) {
+        if (is_dvp_camera_enabled) {
             nxp_soc_gpio_set_out_value(io, 1);
-            is_front_camera_enabled = false;
-            is_front_camera_power_state_changed = true;
+            is_dvp_camera_enabled = false;
+            is_dvp_camera_power_state_changed = true;
         } else {
             nxp_soc_gpio_set_out_value(io, 1);
-            is_front_camera_power_state_changed = false;
+            is_dvp_camera_power_state_changed = false;
         }
-        if (!(is_back_camera_enabled || is_front_camera_enabled)) {
-            camera_power_control(0);
-        }
+        //if (!(is_back_camera_enabled || is_front_camera_enabled)) {
+        //    camera_power_control(0);
+        //}
     }
 
     return 0;
 }
-*/
 
-/* modified by yang
+// modified by yang and hoping
 
-static bool front_camera_power_state_changed(void)
+static bool dvp_camera_power_state_changed(void)
 {
-    return is_front_camera_power_state_changed;
+    return is_dvp_camera_power_state_changed;
 }
 
-static struct i2c_board_info front_camera_i2c_boardinfo[] = {
+static struct i2c_board_info dvp_camera_i2c_boardinfo[] = {
     {
-        I2C_BOARD_INFO("SP0838", 0x18),
+        I2C_BOARD_INFO("OV5645_DVP", 0x78>>1),
     },
 };
-*/
 
 // added by yang 2016.4
 #define MODULE_NAME "OV5645"
@@ -1044,27 +1035,24 @@ static struct i2c_board_info mipi_i2c_camera = {
 };
 
 static struct nxp_v4l2_i2c_board_info sensor = {
-   // {
-    //   modified by yang
+    //   modified by yang and hoping
+    {
          .board_info = &mipi_i2c_camera,
          .i2c_adapter_id = 0,
-    //},
-
-    /*  modified by yang
-        add another camera here  
-    {
-        .board_info = &front_camera_i2c_boardinfo[0],
-        .i2c_adapter_id = 0,
     },
-    */
+    {
+        .board_info = &dvp_i2c_camera,
+        .i2c_adapter_id = 1,
+    },
+
 };
 
 #if 1
 static struct nxp_capture_platformdata capture_plat_data = {
-    //{
+    {
         /* mipi_camera 656 interface */
         .module = 0, 
-        .sensor = &sensor, // sensor[0]:mipi; sensor[1]:dvp 
+        .sensor = &sensor[0], // sensor[0]:mipi; sensor[1]:dvp 
         .type = NXP_CAPTURE_INF_PARALLEL,
         .parallel = {
             /* for 656 */
@@ -1093,17 +1081,16 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .start_delay_ms = 0,
             .stop_delay_ms  = 0,
         },
-    //},
+    },
     
-/*  modified by yang
     {
-        // front_camera 601 interface 
-        .module = 0,
-        .sensor = &sensor[1],	//  sensor[0]:2518  sensor[1] : 0838 ;
+        // dvp_camera 601 interface 
+        .module = 2,
+        .sensor = &sensor[1],	//  sensor[0]:mipi  sensor[1] : dvp;
         .type = NXP_CAPTURE_INF_PARALLEL,
         .parallel = {
             .is_mipi        = false,
-            .external_sync  = true,
+            .external_sync  = true,  //if external_sync is used(this means that value is true), 601 format else 656 format
             .h_active       = 640,
             .h_frontporch   = 1,
             .h_syncwidth    = 1,
@@ -1118,8 +1105,8 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .interlace      = false,
             .clk_rate       = 24000000,
             .late_power_down = true,
-            .power_enable   =front_camera_power_enable,// 
-            .power_state_changed = front_camera_power_state_changed,//
+            .power_enable   =dvp_camera_power_enable,// 
+            .power_state_changed = dvp_camera_power_state_changed,//
             .set_clock      = camera_common_set_clock,
             .setup_io       = camera_common_vin_setup_io,
         },
@@ -1128,82 +1115,10 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .stop_delay_ms  = 0,
         },
     },
- */   
-    //{ 0, NULL, 0, },
-};
-#else  // front ok 1106
-static struct nxp_capture_platformdata capture_plat_data[] = {
-    {
-        /* back_camera 656 interface */
-        // for 5430
-        .module = 0,
-        /*.module = 0,*/
-        .sensor = &sensor[1], // 
-        .type = NXP_CAPTURE_INF_PARALLEL,
-        .parallel = {
-            /* for 656 */
-            .is_mipi        = false,
-            .external_sync  = true, //false, /* 656 interface */
-            .h_active       = 640,	//800,
-            .h_frontporch   = 7,
-            .h_syncwidth    = 1,
-            .h_backporch    = 10,
-            .v_active       = 480,	//600,
-            .v_frontporch   = 0,
-            .v_syncwidth    = 2,
-            .v_backporch    = 3,
-            .clock_invert   = false, //true,
-            .port           = 0,
-            .data_order     = NXP_VIN_Y0CBY1CR,
-            .interlace      = false,
-            .clk_rate       = 24000000,
-            .late_power_down = true,
-            .power_enable   = front_camera_power_enable, //back_camera_power_enable,//
-            .power_state_changed =front_camera_power_state_changed, //back_camera_power_state_changed, //
-            .set_clock      = camera_common_set_clock,
-            .setup_io       = camera_common_vin_setup_io,
-        },
-        .deci = {
-            .start_delay_ms = 0,
-            .stop_delay_ms  = 0,
-        },
-    },
-    {
-        /* front_camera 601 interface */
-        // for 5430
-        .module = 0,//1,
-        /*.module = 0,*/
-        .sensor = &sensor[0],  // 
-        .type = NXP_CAPTURE_INF_PARALLEL,
-        .parallel = {
-            .is_mipi        = false,
-            .external_sync  = true,
-            .h_active       = 640,
-            .h_frontporch   = 1,
-            .h_syncwidth    = 1,
-            .h_backporch    = 0,
-            .v_active       = 480,
-            .v_frontporch   = 0,
-            .v_syncwidth    = 1,
-            .v_backporch    = 0,
-            .clock_invert   = false,
-            .port           = 0,
-            .data_order     = NXP_VIN_CRY1CBY0,//NXP_VIN_CBY0CRY1,
-            .interlace      = false,
-            .clk_rate       = 24000000,
-            .late_power_down = true,
-            .power_enable   =back_camera_power_enable,//front_camera_power_enable,// 
-            .power_state_changed = back_camera_power_state_changed,//front_camera_power_state_changed,//
-            .set_clock      = camera_common_set_clock,
-            .setup_io       = camera_common_vin_setup_io,
-        },
-        .deci = {
-            .start_delay_ms = 0,
-            .stop_delay_ms  = 0,
-        },
-    },
+
     { 0, NULL, 0, },
 };
+#else  // front ok 1106
 
 #endif
 
@@ -1529,7 +1444,7 @@ static struct nxp_out_platformdata out_plat_data = {
 };
 
 static struct nxp_v4l2_platformdata v4l2_plat_data = {
-    .captures = &capture_plat_data,
+    .captures = &capture_plat_data[0],
     .out = &out_plat_data,
 };
 
@@ -1829,13 +1744,7 @@ void __init nxp_board_devs_register(void)
 	platform_add_devices(fb_devices, ARRAY_SIZE(fb_devices));
 #endif
 //TK MIPI	
-#if 1
-#if defined (CONFIG_NXP_DISPLAY_MIPI)
-		printk("plat: add MIPI DSI !!!\n");
-		nxp_platform_disp_device_data(DISP_DEVICE_MIPI, &mipi_vsync_param, (void*)&mipi_param, &mipi_syncgen_param);
-#endif
 //END
-#endif	
 
 #if defined(CONFIG_MMC_DW)
 	#ifdef CONFIG_MMC_NXP_CH0
@@ -1942,10 +1851,6 @@ void __init nxp_board_devs_register(void)
     platform_device_register(&rfkill_device);
 #endif
 
-#if defined(CONFIG_NXP_HDMI_CEC)
-    printk("plat: add device hdmi-cec\n");
-    platform_device_register(&hdmi_cec_device);
-#endif
 
 #if 0//defined(CONFIG_ARM_NXP_CPUFREQ_BY_RESOURCE)
 	back_camera_power_enable(0);

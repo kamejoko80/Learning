@@ -1019,10 +1019,8 @@ static bool dvp_camera_power_state_changed(void)
     return is_dvp_camera_power_state_changed;
 }
 
-static struct i2c_board_info dvp_camera_i2c_boardinfo[] = {
-    {
+static struct i2c_board_info dvp_i2c_camera = {
         I2C_BOARD_INFO("OV5645_DVP", 0x78>>1),
-    },
 };
 
 // added by yang 2016.4
@@ -1034,7 +1032,7 @@ static struct i2c_board_info mipi_i2c_camera = {
 
 };
 
-static struct nxp_v4l2_i2c_board_info sensor = {
+static struct nxp_v4l2_i2c_board_info sensor[] = {
     //   modified by yang and hoping
     {
          .board_info = &mipi_i2c_camera,
@@ -1048,7 +1046,7 @@ static struct nxp_v4l2_i2c_board_info sensor = {
 };
 
 #if 1
-static struct nxp_capture_platformdata capture_plat_data = {
+static struct nxp_capture_platformdata capture_plat_data[] = {
     {
         /* mipi_camera 656 interface */
         .module = 0, 

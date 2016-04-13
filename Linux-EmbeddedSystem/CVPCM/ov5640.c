@@ -1,6 +1,6 @@
 
 /*
- * ov5645 Camera Driver
+ * ov5640 Camera Driver
  *
  * Copyright (C) 2011 Actions Semiconductor Co.,LTD
  * Wang Xin <wangxin@actions-semi.com>
@@ -34,7 +34,7 @@
 #include <linux/regulator/consumer.h>
 #include <mach/soc.h>
 
-#define MODULE_NAME "OV5645"
+#define MODULE_NAME "OV5640"
 #include <mach/gpio.h>
 #include <mach/platform.h>
 
@@ -45,26 +45,26 @@ static struct i2c_board_info asoc_i2c_camera = {
 };
 #endif
 
-#ifdef OV5645_DEBUG
+#ifdef OV5640_DEBUG
 #define assert(expr) \
     if (unlikely(!(expr))) {				\
         pr_err("Assertion failed! %s,%s,%s,line=%d\n",	\
 #expr, __FILE__, __func__, __LINE__);	\
     }
 
-#define OV5645_DEBUG(fmt,args...) printk(KERN_ALERT fmt, ##args)
+#define OV5640_DEBUG(fmt,args...) printk(KERN_ALERT fmt, ##args)
 #else
 
 #define assert(expr) do {} while (0)
 
-#define OV5645_DEBUG(fmt,args...)
+#define OV5640_DEBUG(fmt,args...)
 #endif
 
 #define PID                 0x02 /* Product ID Number  *///caichsh
-#define OV5645              0x53
+#define OV5640              0x53
 #define OUTTO_SENSO_CLOCK   24000000
 #define NUM_CTRLS           11
-#define V4L2_IDENT_OV5645   64188
+#define V4L2_IDENT_OV5640   64188
 
 /* private ctrls */
 #define V4L2_CID_SCENE_EXPOSURE         (V4L2_CTRL_CLASS_CAMERA | 0x1001)
@@ -93,7 +93,7 @@ struct regval_list {
 	u8 value;
 };
 
-static int ov5645_video_probe(struct i2c_client *client);
+static int ov5640_video_probe(struct i2c_client *client);
 /****************************************************************************************
  * predefined reg values
  */
@@ -101,27 +101,27 @@ static int ov5645_video_probe(struct i2c_client *client);
 #define DELAYMARKER { 0xfffe, 0xff }
 
 
-static struct regval_list ov5645_fmt_yuv422_yuyv[] =
+static struct regval_list ov5640_fmt_yuv422_yuyv[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_fmt_yuv422_yvyu[] =
+static struct regval_list ov5640_fmt_yuv422_yvyu[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_fmt_yuv422_vyuy[] =
+static struct regval_list ov5640_fmt_yuv422_vyuy[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_fmt_yuv422_uyvy[] =
+static struct regval_list ov5640_fmt_yuv422_uyvy[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_fmt_raw[] __attribute__((unused)) =
+static struct regval_list ov5640_fmt_raw[] __attribute__((unused)) =
 {
     ENDMARKER,
 };
@@ -129,115 +129,115 @@ static struct regval_list ov5645_fmt_raw[] __attribute__((unused)) =
 /*
  *AWB
  */
-static const struct regval_list ov5645_awb_regs_enable[] =
+static const struct regval_list ov5640_awb_regs_enable[] =
 {
     ENDMARKER,
 };
 
-static const struct regval_list ov5645_awb_regs_diable[] =
+static const struct regval_list ov5640_awb_regs_diable[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_wb_cloud_regs[] =
+static struct regval_list ov5640_wb_cloud_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_wb_daylight_regs[] =
+static struct regval_list ov5640_wb_daylight_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_wb_incandescence_regs[] =
+static struct regval_list ov5640_wb_incandescence_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_wb_fluorescent_regs[] =
+static struct regval_list ov5640_wb_fluorescent_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_wb_tungsten_regs[] =
+static struct regval_list ov5640_wb_tungsten_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_colorfx_none_regs[] =
+static struct regval_list ov5640_colorfx_none_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_colorfx_bw_regs[] =
+static struct regval_list ov5640_colorfx_bw_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_colorfx_sepia_regs[] =
+static struct regval_list ov5640_colorfx_sepia_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_colorfx_negative_regs[] =
+static struct regval_list ov5640_colorfx_negative_regs[] =
 {
     ENDMARKER,
 };
 
-static struct regval_list ov5645_whitebance_auto[] __attribute__((unused)) =
+static struct regval_list ov5640_whitebance_auto[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
-static struct regval_list ov5645_whitebance_cloudy[] __attribute__((unused)) =
+static struct regval_list ov5640_whitebance_cloudy[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
-static  struct regval_list ov5645_whitebance_sunny[] __attribute__((unused)) =
+static  struct regval_list ov5640_whitebance_sunny[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
-static  struct regval_list ov5645_whitebance_fluorescent[] __attribute__((unused)) =
+static  struct regval_list ov5640_whitebance_fluorescent[] __attribute__((unused)) =
 {
 	ENDMARKER,
 
 };
-static  struct regval_list ov5645_whitebance_incandescent[] __attribute__((unused)) =
+static  struct regval_list ov5640_whitebance_incandescent[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
 
-static  struct regval_list ov5645_effect_normal[] __attribute__((unused)) =
+static  struct regval_list ov5640_effect_normal[] __attribute__((unused)) =
 {
     ENDMARKER,
 };
 
-static  struct regval_list ov5645_effect_white_black[] __attribute__((unused)) =
+static  struct regval_list ov5640_effect_white_black[] __attribute__((unused)) =
 {
   ENDMARKER,
 };
 
 /* Effect */
-static  struct regval_list ov5645_effect_negative[] __attribute__((unused)) =
+static  struct regval_list ov5640_effect_negative[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 /*复古效果*/
-static  struct regval_list ov5645_effect_antique[] __attribute__((unused)) =
+static  struct regval_list ov5640_effect_antique[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
 /* Scene */
-static  struct regval_list ov5645_scene_auto[] __attribute__((unused)) =
+static  struct regval_list ov5640_scene_auto[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
 
-static  struct regval_list ov5645_scene_night[] __attribute__((unused)) =
+static  struct regval_list ov5640_scene_night[] __attribute__((unused)) =
 {
 	ENDMARKER,
 };
@@ -246,9 +246,9 @@ static  struct regval_list ov5645_scene_night[] __attribute__((unused)) =
  * register setting for window size
  */
 // mediatech
-static const struct regval_list ov5645_svga_init_regs[] =
+static const struct regval_list ov5640_svga_init_regs[] =
 {
-    //;OV5645MIPI 1280x960,30fps
+    //;OV5640MIPI 1280x960,30fps
 	//56Mhz, 224Mbps/Lane, 2 Lane
 	{0x3103, 0x11},//	; PLL clock selection
 	{0x3008, 0x82},//	; software reset	
@@ -559,10 +559,10 @@ static const struct regval_list ov5645_svga_init_regs[] =
     ENDMARKER//The end flag
 };
 
-static const struct regval_list ov5645_svga_regs[] = {
+static const struct regval_list ov5640_svga_regs[] = {
 
     #if 0
-    	//;OV5645MIPI 1280x960,30fps
+    	//;OV5640MIPI 1280x960,30fps
 	//56Mhz, 224Mbps/Lane, 2Lane.
 	{0x4202, 0x0f},//	; stop mipi stream
 	{0x300e, 0x45},//	; MIPI 2 lane
@@ -633,7 +633,7 @@ static const struct regval_list ov5645_svga_regs[] = {
 	{0x4202, 0x00},//	; open mipi stream
 
     {0x503d,0x80},// color bar test
-	//OV5645MIPIWriteExtraShutter(OV5645MIPISensor.PreviewExtraShutter);
+	//OV5640MIPIWriteExtraShutter(OV5640MIPISensor.PreviewExtraShutter);
 
 
     #else
@@ -713,18 +713,18 @@ static const struct regval_list ov5645_svga_regs[] = {
     ENDMARKER
 };
 
-static const struct regval_list ov5645_uxga_regs[] = {//caichsh
+static const struct regval_list ov5640_uxga_regs[] = {//caichsh
     ENDMARKER,
 };
 
-static const struct regval_list ov5645_disable_regs[] = {
+static const struct regval_list ov5640_disable_regs[] = {
     ENDMARKER,
 };
 
 /****************************************************************************************
  * structures
  */
-struct ov5645_win_size {
+struct ov5640_win_size {
     char                        *name;
     __u32                       width;
     __u32                       height;
@@ -749,12 +749,12 @@ enum prev_capt {
     CAPTURE_MODE
 };
 
-struct ov5645_priv {
+struct ov5640_priv {
     struct v4l2_subdev                  subdev;
     struct media_pad                    pad;
     struct v4l2_ctrl_handler            hdl;
-    const struct ov5645_color_format    *cfmt;
-    const struct ov5645_win_size        *win;
+    const struct ov5640_color_format    *cfmt;
+    const struct ov5640_win_size        *win;
     int                                 model;
     bool                                initialized;
 
@@ -783,7 +783,7 @@ struct ov5645_priv {
     exposure_param_t capture_exposure_param;
 };
 
-struct ov5645_color_format {
+struct ov5640_color_format {
     enum v4l2_mbus_pixelcode code;
     enum v4l2_colorspace colorspace;
 };
@@ -791,7 +791,7 @@ struct ov5645_color_format {
 /****************************************************************************************
  * tables
  */
-static const struct ov5645_color_format ov5645_cfmts[] = {
+static const struct ov5640_color_format ov5640_cfmts[] = {
     {
         .code		= V4L2_MBUS_FMT_YUYV8_2X8,
         .colorspace	= V4L2_COLORSPACE_JPEG,
@@ -819,9 +819,9 @@ static const struct ov5645_color_format ov5645_cfmts[] = {
 #define UXGA_HEIGHT         1200
 #define SVGA_WIDTH          1280
 #define SVGA_HEIGHT         960
-#define OV5645_MAX_WIDTH    UXGA_WIDTH
-#define OV5645_MAX_HEIGHT   UXGA_HEIGHT
-#define AHEAD_LINE_NUM		15    //10行 = 50次循环(OV5645)
+#define OV5640_MAX_WIDTH    UXGA_WIDTH
+#define OV5640_MAX_HEIGHT   UXGA_HEIGHT
+#define AHEAD_LINE_NUM		15    //10行 = 50次循环(OV5640)
 #define DROP_NUM_CAPTURE			0
 #define DROP_NUM_PREVIEW			0
 
@@ -829,52 +829,52 @@ static unsigned int frame_rate_svga[] = {12,};
 static unsigned int frame_rate_uxga[] = {12,};
 
 /* 800X600 */
-static const struct ov5645_win_size ov5645_win_svga = {
+static const struct ov5640_win_size ov5640_win_svga = {
     .name     = "SVGA",
     .width    = SVGA_WIDTH,
     .height   = SVGA_HEIGHT,
-    .win_regs = ov5645_svga_regs,
+    .win_regs = ov5640_svga_regs,
     .frame_rate_array = frame_rate_svga,
 };
 
 /* 1600X1200 */
-static const struct ov5645_win_size ov5645_win_uxga = {
+static const struct ov5640_win_size ov5640_win_uxga = {
     .name     = "UXGA",
     .width    = UXGA_WIDTH,
     .height   = UXGA_HEIGHT,
-    .win_regs = ov5645_uxga_regs,
+    .win_regs = ov5640_uxga_regs,
     .frame_rate_array = frame_rate_uxga,
 };
 
-static const struct ov5645_win_size *ov5645_win[] = {
-    &ov5645_win_svga,
-    &ov5645_win_uxga,
+static const struct ov5640_win_size *ov5640_win[] = {
+    &ov5640_win_svga,
+    &ov5640_win_uxga,
 };
 
 /****************************************************************************************
  * general functions
  */
-static inline struct ov5645_priv *to_priv(struct v4l2_subdev *subdev)
+static inline struct ov5640_priv *to_priv(struct v4l2_subdev *subdev)
 {
-    return container_of(subdev, struct ov5645_priv, subdev);
+    return container_of(subdev, struct ov5640_priv, subdev);
 }
 
 static inline struct v4l2_subdev *ctrl_to_sd(struct v4l2_ctrl *ctrl)
 {
-    return &container_of(ctrl->handler, struct ov5645_priv, hdl)->subdev;
+    return &container_of(ctrl->handler, struct ov5640_priv, hdl)->subdev;
 }
 /*
 static bool check_id(struct i2c_client *client)
 {
     u8 pid = i2c_smbus_read_byte_data(client, PID);
-    if (pid == ov5645)
+    if (pid == ov5640)
         return true;
 
     printk(KERN_ERR "failed to check id: 0x%x\n", pid);
     return false;
 }*/
 /*
-static int ov5645_write_array(struct i2c_client *client, const struct regval_list *vals)
+static int ov5640_write_array(struct i2c_client *client, const struct regval_list *vals)
 {
     int ret;
     while (vals->reg_num != 0xff) {
@@ -886,8 +886,8 @@ static int ov5645_write_array(struct i2c_client *client, const struct regval_lis
     return 0;
 }*/
 /*
-static int ov5645_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set) __attribute__((unused));
-static int ov5645_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set)
+static int ov5640_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set) __attribute__((unused));
+static int ov5640_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set)
 {
     s32 val = i2c_smbus_read_byte_data(client, command);
     if (val < 0)
@@ -954,7 +954,7 @@ static int reg_write16(struct i2c_client *client, u16 reg, u16 val16)
 }
 
 #ifdef CONFIG_VIDEO_ADV_DEBUG
-static int ov5645_get_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg)
+static int ov5640_get_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 	int ret;
@@ -972,7 +972,7 @@ static int ov5645_get_register(struct v4l2_subdev *sd, struct v4l2_dbg_register 
 	return ret;
 }
 
-static int ov5645_set_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg)
+static int ov5640_set_register(struct v4l2_subdev *sd, struct v4l2_dbg_register *reg)
 {
 	struct i2c_client *client = v4l2_get_subdevdata(sd);
 
@@ -983,7 +983,7 @@ static int ov5645_set_register(struct v4l2_subdev *sd, struct v4l2_dbg_register 
 }
 #endif
 
-static int ov5645_write_array(struct i2c_client *client,
+static int ov5640_write_array(struct i2c_client *client,
 				const struct regval_list *vals)
 {
 	while (vals->reg_num != 0xffff || vals->value != 0xff) {
@@ -1004,14 +1004,14 @@ static int ov5645_write_array(struct i2c_client *client,
 
 
 
-static const struct ov5645_win_size *ov5645_select_win(u32 width, u32 height)
+static const struct ov5640_win_size *ov5640_select_win(u32 width, u32 height)
 {
-	const struct ov5645_win_size *win;
+	const struct ov5640_win_size *win;
     int i;
     printk("%s.............%d...........\n",__func__,__LINE__);
 
-    for (i = 0; i < ARRAY_SIZE(ov5645_win); i++) {
-        win = ov5645_win[i];
+    for (i = 0; i < ARRAY_SIZE(ov5640_win); i++) {
+        win = ov5640_win[i];
         if (width == win->width && height == win->height)
             return win;
     }
@@ -1020,7 +1020,7 @@ static const struct ov5645_win_size *ov5645_select_win(u32 width, u32 height)
     return NULL;
 }
 
-static int ov5645_set_mbusformat(struct i2c_client *client, const struct ov5645_color_format *cfmt)
+static int ov5640_set_mbusformat(struct i2c_client *client, const struct ov5640_color_format *cfmt)
 {
 
     printk("%s.............%d...........\n",__func__,__LINE__);
@@ -1029,16 +1029,16 @@ static int ov5645_set_mbusformat(struct i2c_client *client, const struct ov5645_
     code = cfmt->code;
     switch (code) {
         case V4L2_MBUS_FMT_YUYV8_2X8:
-            ret  = ov5645_write_array(client, ov5645_fmt_yuv422_yuyv);
+            ret  = ov5640_write_array(client, ov5640_fmt_yuv422_yuyv);
             break;
         case V4L2_MBUS_FMT_UYVY8_2X8:
-            ret  = ov5645_write_array(client, ov5645_fmt_yuv422_uyvy);
+            ret  = ov5640_write_array(client, ov5640_fmt_yuv422_uyvy);
             break;
         case V4L2_MBUS_FMT_YVYU8_2X8:
-            ret  = ov5645_write_array(client, ov5645_fmt_yuv422_yvyu);
+            ret  = ov5640_write_array(client, ov5640_fmt_yuv422_yvyu);
             break;
         case V4L2_MBUS_FMT_VYUY8_2X8:
-            ret  = ov5645_write_array(client, ov5645_fmt_yuv422_vyuy);
+            ret  = ov5640_write_array(client, ov5640_fmt_yuv422_vyuy);
             break;
         default:
             printk(KERN_ERR "mbus code error in %s() line %d\n",__FUNCTION__, __LINE__);
@@ -1046,10 +1046,10 @@ static int ov5645_set_mbusformat(struct i2c_client *client, const struct ov5645_
     return ret;
 }
 
-static int ov5645_set_params(struct v4l2_subdev *sd, u32 *width, u32 *height, enum v4l2_mbus_pixelcode code)
+static int ov5640_set_params(struct v4l2_subdev *sd, u32 *width, u32 *height, enum v4l2_mbus_pixelcode code)
 {
-    struct ov5645_priv *priv = to_priv(sd);
-    const struct ov5645_win_size *old_win, *new_win;
+    struct ov5640_priv *priv = to_priv(sd);
+    const struct ov5640_win_size *old_win, *new_win;
     int i;
     printk("%s.............%d...........\n",__func__,__LINE__);
 
@@ -1057,9 +1057,9 @@ static int ov5645_set_params(struct v4l2_subdev *sd, u32 *width, u32 *height, en
      * select format
      */
     priv->cfmt = NULL;
-    for (i = 0; i < ARRAY_SIZE(ov5645_cfmts); i++) {
-        if (code == ov5645_cfmts[i].code) {
-            priv->cfmt = ov5645_cfmts + i;
+    for (i = 0; i < ARRAY_SIZE(ov5640_cfmts); i++) {
+        if (code == ov5640_cfmts[i].code) {
+            priv->cfmt = ov5640_cfmts + i;
             break;
         }
     }
@@ -1072,7 +1072,7 @@ static int ov5645_set_params(struct v4l2_subdev *sd, u32 *width, u32 *height, en
      * select win
      */
     old_win = priv->win;
-    new_win = ov5645_select_win(*width, *height);
+    new_win = ov5640_select_win(*width, *height);
     if (!new_win) {
         printk(KERN_ERR "Unsupported win size\n");
         return -EINVAL;
@@ -1093,7 +1093,7 @@ static int ov5645_set_params(struct v4l2_subdev *sd, u32 *width, u32 *height, en
 /****************************************************************************************
  * control functions
  */
-static int ov5645_set_brightness(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_brightness(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
     printk("%s.............%d...........\n",__func__,__LINE__);
@@ -1101,7 +1101,7 @@ static int ov5645_set_brightness(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
     return 0;
 }
 
-static int ov5645_set_contrast(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_contrast(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     /* TODO */
     int contrast = ctrl->val;
@@ -1110,10 +1110,10 @@ static int ov5645_set_contrast(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
     return 0;
 }
 
-static int ov5645_set_auto_white_balance(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_auto_white_balance(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     int auto_white_balance = ctrl->val;
     int ret;
 
@@ -1125,12 +1125,12 @@ static int ov5645_set_auto_white_balance(struct v4l2_subdev *sd, struct v4l2_ctr
 
     switch(auto_white_balance) {
         case 0:
-            OV5645_DEBUG(KERN_ERR "===awb disable===\n");
-            ret = ov5645_write_array(client, ov5645_awb_regs_diable);
+            OV5640_DEBUG(KERN_ERR "===awb disable===\n");
+            ret = ov5640_write_array(client, ov5640_awb_regs_diable);
             break;
         case 1:
-            OV5645_DEBUG(KERN_ERR "===awb enable===\n");
-            ret = ov5645_write_array(client, ov5645_awb_regs_enable);
+            OV5640_DEBUG(KERN_ERR "===awb enable===\n");
+            ret = ov5640_write_array(client, ov5640_awb_regs_enable);
             break;
     }
 
@@ -1140,37 +1140,37 @@ static int ov5645_set_auto_white_balance(struct v4l2_subdev *sd, struct v4l2_ctr
 }
 
 /* TODO : exposure */
-static int ov5645_set_exposure(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_exposure(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     /* struct i2c_client *client = v4l2_get_subdevdata(sd); */
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     printk("%s: val %d\n", __func__, ctrl->val);
 
     return 0;
 }
 
 /* TODO */
-static int ov5645_set_gain(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_gain(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     /* struct i2c_client *client = v4l2_get_subdevdata(sd); */
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     printk("%s: val %d\n", __func__, ctrl->val);
     return 0;
 }
 
 /* TODO */
-static int ov5645_set_hflip(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_hflip(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     /* struct i2c_client *client = v4l2_get_subdevdata(sd); */
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     printk("%s: val %d\n", __func__, ctrl->val);
     return 0;
 }
 
-static int ov5645_set_white_balance_temperature(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_white_balance_temperature(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     int white_balance_temperature = ctrl->val;
     int ret;
 
@@ -1178,19 +1178,19 @@ static int ov5645_set_white_balance_temperature(struct v4l2_subdev *sd, struct v
 
     switch(white_balance_temperature) {
         case V4L2_WHITE_BALANCE_INCANDESCENT:
-            ret = ov5645_write_array(client, ov5645_wb_incandescence_regs);
+            ret = ov5640_write_array(client, ov5640_wb_incandescence_regs);
             break;
         case V4L2_WHITE_BALANCE_FLUORESCENT:
-            ret = ov5645_write_array(client, ov5645_wb_fluorescent_regs);
+            ret = ov5640_write_array(client, ov5640_wb_fluorescent_regs);
             break;
         case V4L2_WHITE_BALANCE_DAYLIGHT:
-            ret = ov5645_write_array(client, ov5645_wb_daylight_regs);
+            ret = ov5640_write_array(client, ov5640_wb_daylight_regs);
             break;
         case V4L2_WHITE_BALANCE_CLOUDY_DAYLIGHT:
-            ret = ov5645_write_array(client, ov5645_wb_cloud_regs);
+            ret = ov5640_write_array(client, ov5640_wb_cloud_regs);
             break;
         case V4L2_WHITE_BALANCE_TUNGSTEN:
-            ret = ov5645_write_array(client, ov5645_wb_tungsten_regs);
+            ret = ov5640_write_array(client, ov5640_wb_tungsten_regs);
             break;
         default:
             dev_err(&client->dev, "set white_balance_temperature over range, white_balance_temperature = %d\n", white_balance_temperature);
@@ -1202,10 +1202,10 @@ static int ov5645_set_white_balance_temperature(struct v4l2_subdev *sd, struct v
     return 0;
 }
 
-static int ov5645_set_colorfx(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_colorfx(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     int colorfx = ctrl->val;
     int ret;
 
@@ -1213,16 +1213,16 @@ static int ov5645_set_colorfx(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 
     switch (colorfx) {
         case V4L2_COLORFX_NONE: /* normal */
-            ret = ov5645_write_array(client, ov5645_colorfx_none_regs);
+            ret = ov5640_write_array(client, ov5640_colorfx_none_regs);
             break;
         case V4L2_COLORFX_BW: /* black and white */
-            ret = ov5645_write_array(client, ov5645_colorfx_bw_regs);
+            ret = ov5640_write_array(client, ov5640_colorfx_bw_regs);
             break;
         case V4L2_COLORFX_SEPIA: /* antique ,复古*/
-            ret = ov5645_write_array(client, ov5645_colorfx_sepia_regs);
+            ret = ov5640_write_array(client, ov5640_colorfx_sepia_regs);
             break;
         case V4L2_COLORFX_NEGATIVE: /* negative，负片 */
-            ret = ov5645_write_array(client, ov5645_colorfx_negative_regs);
+            ret = ov5640_write_array(client, ov5640_colorfx_negative_regs);
             break;
         default:
             dev_err(&client->dev, "set colorfx over range, colorfx = %d\n", colorfx);
@@ -1233,10 +1233,10 @@ static int ov5645_set_colorfx(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
     return 0;
 }
 
-static int ov5645_set_exposure_auto(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_exposure_auto(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    /* struct ov5645_priv *priv = to_priv(sd); */
+    /* struct ov5640_priv *priv = to_priv(sd); */
     int exposure_auto = ctrl->val;
 
     /* unsigned int reg_0xec; */
@@ -1253,11 +1253,11 @@ static int ov5645_set_exposure_auto(struct v4l2_subdev *sd, struct v4l2_ctrl *ct
 }
 
 /* TODO */
-static int ov5645_set_scene_exposure(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_scene_exposure(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
 #if 0
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     int scene_exposure = ctrl->val;
 
     unsigned int reg_0xec;
@@ -1283,10 +1283,10 @@ static int ov5645_set_scene_exposure(struct v4l2_subdev *sd, struct v4l2_ctrl *c
     return 0;
 }
 
-static int ov5645_set_prev_capt_mode(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int ov5640_set_prev_capt_mode(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     printk("%s: val %d\n", __func__, ctrl->val);
 
     switch(ctrl->val) {
@@ -1304,7 +1304,7 @@ static int ov5645_set_prev_capt_mode(struct v4l2_subdev *sd, struct v4l2_ctrl *c
     return 0;
 }
 
-static int ov5645_s_ctrl(struct v4l2_ctrl *ctrl)
+static int ov5640_s_ctrl(struct v4l2_ctrl *ctrl)
 {
     struct v4l2_subdev *sd = ctrl_to_sd(ctrl);
     struct i2c_client *client = v4l2_get_subdevdata(sd);
@@ -1313,47 +1313,47 @@ static int ov5645_s_ctrl(struct v4l2_ctrl *ctrl)
 
     switch (ctrl->id) {
         case V4L2_CID_BRIGHTNESS:
-            ov5645_set_brightness(sd, ctrl);
+            ov5640_set_brightness(sd, ctrl);
             break;
 
         case V4L2_CID_CONTRAST:
-            ov5645_set_contrast(sd, ctrl);
+            ov5640_set_contrast(sd, ctrl);
             break;
 
         case V4L2_CID_AUTO_WHITE_BALANCE:
-            ov5645_set_auto_white_balance(sd, ctrl);
+            ov5640_set_auto_white_balance(sd, ctrl);
             break;
 
         case V4L2_CID_EXPOSURE:
-            ov5645_set_exposure(sd, ctrl);
+            ov5640_set_exposure(sd, ctrl);
             break;
 
         case V4L2_CID_GAIN:
-            ov5645_set_gain(sd, ctrl);
+            ov5640_set_gain(sd, ctrl);
             break;
 
         case V4L2_CID_HFLIP:
-            ov5645_set_hflip(sd, ctrl);
+            ov5640_set_hflip(sd, ctrl);
             break;
 
         case V4L2_CID_WHITE_BALANCE_TEMPERATURE:
-            ov5645_set_white_balance_temperature(sd, ctrl);
+            ov5640_set_white_balance_temperature(sd, ctrl);
             break;
 
         case V4L2_CID_COLORFX:
-            ov5645_set_colorfx(sd, ctrl);
+            ov5640_set_colorfx(sd, ctrl);
             break;
 
         case V4L2_CID_EXPOSURE_AUTO:
-            ov5645_set_exposure_auto(sd, ctrl);
+            ov5640_set_exposure_auto(sd, ctrl);
             break;
 
         case V4L2_CID_SCENE_EXPOSURE:
-            ov5645_set_scene_exposure(sd, ctrl);
+            ov5640_set_scene_exposure(sd, ctrl);
             break;
 
         case V4L2_CID_PRIVATE_PREV_CAPT:
-            ov5645_set_prev_capt_mode(sd, ctrl);
+            ov5640_set_prev_capt_mode(sd, ctrl);
             break;
 
         default:
@@ -1364,13 +1364,13 @@ static int ov5645_s_ctrl(struct v4l2_ctrl *ctrl)
     return ret;
 }
 
-static const struct v4l2_ctrl_ops ov5645_ctrl_ops = {
-    .s_ctrl = ov5645_s_ctrl,
+static const struct v4l2_ctrl_ops ov5640_ctrl_ops = {
+    .s_ctrl = ov5640_s_ctrl,
 };
 
-static const struct v4l2_ctrl_config ov5645_custom_ctrls[] = {
+static const struct v4l2_ctrl_config ov5640_custom_ctrls[] = {
     {
-        .ops    = &ov5645_ctrl_ops,
+        .ops    = &ov5640_ctrl_ops,
         .id     = V4L2_CID_SCENE_EXPOSURE,
         .type   = V4L2_CTRL_TYPE_INTEGER,
         .name   = "SceneExposure",
@@ -1379,7 +1379,7 @@ static const struct v4l2_ctrl_config ov5645_custom_ctrls[] = {
         .def    = 0,
         .step   = 1,
     }, {
-        .ops    = &ov5645_ctrl_ops,
+        .ops    = &ov5640_ctrl_ops,
         .id     = V4L2_CID_PRIVATE_PREV_CAPT,
         .type   = V4L2_CTRL_TYPE_INTEGER,
         .name   = "PrevCapt",
@@ -1390,28 +1390,28 @@ static const struct v4l2_ctrl_config ov5645_custom_ctrls[] = {
     }
 };
 
-static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
+static int ov5640_initialize_ctrls(struct ov5640_priv *priv)
 {
     printk("%s.............%d...........\n",__func__,__LINE__);
 
     v4l2_ctrl_handler_init(&priv->hdl, NUM_CTRLS);
 
     /* standard ctrls */
-    priv->brightness = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->brightness = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_BRIGHTNESS, 0, 6, 1, 0);
     if (!priv->brightness) {
         printk(KERN_ERR "%s: failed to create brightness ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->contrast = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->contrast = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_CONTRAST, -6, 6, 1, 0);
     if (!priv->contrast) {
         printk(KERN_ERR "%s: failed to create contrast ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->auto_white_balance = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->auto_white_balance = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_AUTO_WHITE_BALANCE, 0, 1, 1, 1);
     if (!priv->auto_white_balance) {
         printk(KERN_ERR "%s: failed to create auto_white_balance ctrl\n", __func__);
@@ -1419,7 +1419,7 @@ static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
     }
 
 #if 0
-    priv->exposure = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->exposure = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_EXPOSURE, 0, 0xFFFF, 1, 500);
     if (!priv->exposure) {
         printk(KERN_ERR "%s: failed to create exposure ctrl\n", __func__);
@@ -1427,21 +1427,21 @@ static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
     }
 #endif
 
-    priv->gain = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->gain = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_GAIN, 0, 0xFF, 1, 128);
     if (!priv->gain) {
         printk(KERN_ERR "%s: failed to create gain ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->hflip = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->hflip = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_HFLIP, 0, 1, 1, 0);
     if (!priv->hflip) {
         printk(KERN_ERR "%s: failed to create hflip ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->white_balance_temperature = v4l2_ctrl_new_std(&priv->hdl, &ov5645_ctrl_ops,
+    priv->white_balance_temperature = v4l2_ctrl_new_std(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_WHITE_BALANCE_TEMPERATURE, 0, 3, 1, 1);
     if (!priv->white_balance_temperature) {
         printk(KERN_ERR "%s: failed to create white_balance_temperature ctrl\n", __func__);
@@ -1449,14 +1449,14 @@ static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
     }
 
     /* standard menus */
-    priv->colorfx = v4l2_ctrl_new_std_menu(&priv->hdl, &ov5645_ctrl_ops,
+    priv->colorfx = v4l2_ctrl_new_std_menu(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_COLORFX, 3, 0, 0);
     if (!priv->colorfx) {
         printk(KERN_ERR "%s: failed to create colorfx ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->exposure_auto = v4l2_ctrl_new_std_menu(&priv->hdl, &ov5645_ctrl_ops,
+    priv->exposure_auto = v4l2_ctrl_new_std_menu(&priv->hdl, &ov5640_ctrl_ops,
             V4L2_CID_EXPOSURE_AUTO, 1, 0, 1);
     if (!priv->exposure_auto) {
         printk(KERN_ERR "%s: failed to create exposure_auto ctrl\n", __func__);
@@ -1464,13 +1464,13 @@ static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
     }
 
     /* custom ctrls */
-    priv->scene_exposure = v4l2_ctrl_new_custom(&priv->hdl, &ov5645_custom_ctrls[0], NULL);
+    priv->scene_exposure = v4l2_ctrl_new_custom(&priv->hdl, &ov5640_custom_ctrls[0], NULL);
     if (!priv->scene_exposure) {
         printk(KERN_ERR "%s: failed to create scene_exposure ctrl\n", __func__);
         return -ENOENT;
     }
 
-    priv->prev_capt = v4l2_ctrl_new_custom(&priv->hdl, &ov5645_custom_ctrls[1], NULL);
+    priv->prev_capt = v4l2_ctrl_new_custom(&priv->hdl, &ov5640_custom_ctrls[1], NULL);
     if (!priv->prev_capt) {
         printk(KERN_ERR "%s: failed to create prev_capt ctrl\n", __func__);
         return -ENOENT;
@@ -1486,10 +1486,10 @@ static int ov5645_initialize_ctrls(struct ov5645_priv *priv)
     return 0;
 }
 
-static int ov5645_save_exposure_param(struct v4l2_subdev *sd)
+static int ov5640_save_exposure_param(struct v4l2_subdev *sd)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     int ret = 0;
   /*  unsigned int reg_0x03 = 0x20;
     unsigned int reg_0x80;
@@ -1507,11 +1507,11 @@ static int ov5645_save_exposure_param(struct v4l2_subdev *sd)
     return ret;
 }
 
-static int ov5645_set_exposure_param(struct v4l2_subdev *sd) __attribute__((unused));
-static int ov5645_set_exposure_param(struct v4l2_subdev *sd)
+static int ov5640_set_exposure_param(struct v4l2_subdev *sd) __attribute__((unused));
+static int ov5640_set_exposure_param(struct v4l2_subdev *sd)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     int ret;
  /*   unsigned int reg_0x03 = 0x20;
     unsigned int reg_0x83;
@@ -1540,22 +1540,22 @@ static int ov5645_set_exposure_param(struct v4l2_subdev *sd)
 /**
  * core ops
  */
-static int ov5645_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *id)
+static int ov5640_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *id)
 {
     printk("%s.............%d...........\n",__func__,__LINE__);
 
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     id->ident    = priv->model;
     id->revision = 0;
     return 0;
 }
 
-static int ov5645_s_power(struct v4l2_subdev *sd, int on)
+static int ov5640_s_power(struct v4l2_subdev *sd, int on)
 {
     /* used when suspending */
     /* printk("%s: on %d\n", __func__, on); */
     if (!on) {
-        struct ov5645_priv *priv = to_priv(sd);
+        struct ov5640_priv *priv = to_priv(sd);
         priv->initialized = false;
     }
     printk("%s.............%d...........\n",__func__,__LINE__);
@@ -1563,23 +1563,23 @@ static int ov5645_s_power(struct v4l2_subdev *sd, int on)
     return 0;
 }
 
-static const struct v4l2_subdev_core_ops ov5645_subdev_core_ops = {
-    .g_chip_ident	= ov5645_g_chip_ident,
-    .s_power        = ov5645_s_power,
+static const struct v4l2_subdev_core_ops ov5640_subdev_core_ops = {
+    .g_chip_ident	= ov5640_g_chip_ident,
+    .s_power        = ov5640_s_power,
     .s_ctrl         = v4l2_subdev_s_ctrl,
 };
 
 /**
  * video ops
  */
-static int ov5645_s_stream(struct v4l2_subdev *sd, int enable)
+static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     int ret = 0;
 
     printk("%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
-    ov5645_video_probe(client);
+    ov5640_video_probe(client);
     if (enable) {
         if (!priv->win || !priv->cfmt) {
             dev_err(&client->dev, "norm or win select error\n");
@@ -1590,41 +1590,41 @@ static int ov5645_s_stream(struct v4l2_subdev *sd, int enable)
            // if (!check_id(client))
             //    return -EINVAL;
 
-            ret = ov5645_write_array(client, ov5645_svga_init_regs);
+            ret = ov5640_write_array(client, ov5640_svga_init_regs);
             if (ret < 0) {
-                printk(KERN_ERR "%s: failed to ov5645_write_array init regs\n", __func__);
+                printk(KERN_ERR "%s: failed to ov5640_write_array init regs\n", __func__);
                 return -EIO;
             }
             priv->initialized = true;
-            printk(KERN_ERR "%s ov5645_write_array init regs\n", __func__);
+            printk(KERN_ERR "%s ov5640_write_array init regs\n", __func__);
         }
 
-        ret = ov5645_write_array(client, priv->win->win_regs);
+        ret = ov5640_write_array(client, priv->win->win_regs);
         if (ret < 0) {
-            printk(KERN_ERR "%s: failed to ov5645_write_array win regs\n", __func__);
+            printk(KERN_ERR "%s: failed to ov5640_write_array win regs\n", __func__);
             return -EIO;
         }
-        printk(KERN_ERR "%s: ov5645_write_array win regs\n", __func__);
+        printk(KERN_ERR "%s: ov5640_write_array win regs\n", __func__);
 
-        ret = ov5645_set_mbusformat(client, priv->cfmt);
+        ret = ov5640_set_mbusformat(client, priv->cfmt);
         if (ret < 0) {
-            printk(KERN_ERR "%s: failed to ov5645_set_mbusformat()\n", __func__);
+            printk(KERN_ERR "%s: failed to ov5640_set_mbusformat()\n", __func__);
             return -EIO;
         }
     } else {
-        ov5645_write_array(client, ov5645_disable_regs);
+        ov5640_write_array(client, ov5640_disable_regs);
     }
 
     return ret;
 }
 
-static int ov5645_enum_framesizes(struct v4l2_subdev *sd, struct v4l2_frmsizeenum *fsize)
+static int ov5640_enum_framesizes(struct v4l2_subdev *sd, struct v4l2_frmsizeenum *fsize)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
     printk("%s.............%d...........\n",__func__,__LINE__);
 
-    if (fsize->index >= ARRAY_SIZE(ov5645_win)) {
-        dev_err(&client->dev, "index(%d) is over range %d\n", fsize->index, ARRAY_SIZE(ov5645_win));
+    if (fsize->index >= ARRAY_SIZE(ov5640_win)) {
+        dev_err(&client->dev, "index(%d) is over range %d\n", fsize->index, ARRAY_SIZE(ov5640_win));
         return -EINVAL;
     }
 
@@ -1634,8 +1634,8 @@ static int ov5645_enum_framesizes(struct v4l2_subdev *sd, struct v4l2_frmsizeenu
         case V4L2_PIX_FMT_NV12:
         case V4L2_PIX_FMT_YUYV:
             fsize->type = V4L2_FRMSIZE_TYPE_DISCRETE;
-            fsize->discrete.width = ov5645_win[fsize->index]->width;
-            fsize->discrete.height = ov5645_win[fsize->index]->height;
+            fsize->discrete.width = ov5640_win[fsize->index]->width;
+            fsize->discrete.height = ov5640_win[fsize->index]->height;
             break;
         default:
             dev_err(&client->dev, "pixel_format(%d) is Unsupported\n", fsize->pixel_format);
@@ -1646,25 +1646,25 @@ static int ov5645_enum_framesizes(struct v4l2_subdev *sd, struct v4l2_frmsizeenu
     return 0;
 }
 
-static int ov5645_enum_mbus_fmt(struct v4l2_subdev *sd, unsigned int index,
+static int ov5640_enum_mbus_fmt(struct v4l2_subdev *sd, unsigned int index,
         enum v4l2_mbus_pixelcode *code)
 {
-    if (index >= ARRAY_SIZE(ov5645_cfmts))
+    if (index >= ARRAY_SIZE(ov5640_cfmts))
         return -EINVAL;
     printk("%s.............%d...........\n",__func__,__LINE__);
 
-    *code = ov5645_cfmts[index].code;
+    *code = ov5640_cfmts[index].code;
     return 0;
 }
 
-static int ov5645_g_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *mf)
+static int ov5640_g_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *mf)
 {
     struct i2c_client *client = v4l2_get_subdevdata(sd);
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     if (!priv->win || !priv->cfmt) {
         u32 width = SVGA_WIDTH;
         u32 height = SVGA_HEIGHT;
-        int ret = ov5645_set_params(sd, &width, &height, V4L2_MBUS_FMT_UYVY8_2X8);
+        int ret = ov5640_set_params(sd, &width, &height, V4L2_MBUS_FMT_UYVY8_2X8);
         if (ret < 0) {
             dev_info(&client->dev, "%s, %d\n", __func__, __LINE__);
             return ret;
@@ -1681,19 +1681,19 @@ static int ov5645_g_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *
     return 0;
 }
 
-static int ov5645_try_mbus_fmt(struct v4l2_subdev *sd,
+static int ov5640_try_mbus_fmt(struct v4l2_subdev *sd,
         struct v4l2_mbus_framefmt *mf)
 {
     /* struct i2c_client *client = v4l2_get_subdevdata(sd); */
-    struct ov5645_priv *priv = to_priv(sd);
-    const struct ov5645_win_size *win;
+    struct ov5640_priv *priv = to_priv(sd);
+    const struct ov5640_win_size *win;
     int i;
     printk("%s.............%d...........\n",__func__,__LINE__);
 
     /*
      * select suitable win
      */
-    win = ov5645_select_win(mf->width, mf->height);
+    win = ov5640_select_win(mf->width, mf->height);
     if (!win)
         return -EINVAL;
 
@@ -1702,11 +1702,11 @@ static int ov5645_try_mbus_fmt(struct v4l2_subdev *sd,
     mf->field   = V4L2_FIELD_NONE;
 
 
-    for (i = 0; i < ARRAY_SIZE(ov5645_cfmts); i++)
-        if (mf->code == ov5645_cfmts[i].code)
+    for (i = 0; i < ARRAY_SIZE(ov5640_cfmts); i++)
+        if (mf->code == ov5640_cfmts[i].code)
             break;
 
-    if (i == ARRAY_SIZE(ov5645_cfmts)) {
+    if (i == ARRAY_SIZE(ov5640_cfmts)) {
         /* Unsupported format requested. Propose either */
         if (priv->cfmt) {
             /* the current one or */
@@ -1714,67 +1714,67 @@ static int ov5645_try_mbus_fmt(struct v4l2_subdev *sd,
             mf->code = priv->cfmt->code;
         } else {
             /* the default one */
-            mf->colorspace = ov5645_cfmts[0].colorspace;
-            mf->code = ov5645_cfmts[0].code;
+            mf->colorspace = ov5640_cfmts[0].colorspace;
+            mf->code = ov5640_cfmts[0].code;
         }
     } else {
         /* Also return the colorspace */
-        mf->colorspace	= ov5645_cfmts[i].colorspace;
+        mf->colorspace	= ov5640_cfmts[i].colorspace;
     }
 
     return 0;
 }
 
-static int ov5645_s_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *mf)
+static int ov5640_s_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *mf)
 {
     /* struct i2c_client *client = v4l2_get_subdevdata(sd); */
-    struct ov5645_priv *priv = to_priv(sd);
+    struct ov5640_priv *priv = to_priv(sd);
     printk("%s.............%d...........\n",__func__,__LINE__);
 
-    int ret = ov5645_set_params(sd, &mf->width, &mf->height, mf->code);
+    int ret = ov5640_set_params(sd, &mf->width, &mf->height, mf->code);
     if (!ret)
         mf->colorspace = priv->cfmt->colorspace;
 
     return ret;
 }
 
-static const struct v4l2_subdev_video_ops ov5645_subdev_video_ops = {
-    .s_stream               = ov5645_s_stream,
-    .enum_framesizes        = ov5645_enum_framesizes,
-    .enum_mbus_fmt          = ov5645_enum_mbus_fmt,
-    .g_mbus_fmt             = ov5645_g_mbus_fmt,
-    .try_mbus_fmt           = ov5645_try_mbus_fmt,
-    .s_mbus_fmt             = ov5645_s_mbus_fmt,
+static const struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
+    .s_stream               = ov5640_s_stream,
+    .enum_framesizes        = ov5640_enum_framesizes,
+    .enum_mbus_fmt          = ov5640_enum_mbus_fmt,
+    .g_mbus_fmt             = ov5640_g_mbus_fmt,
+    .try_mbus_fmt           = ov5640_try_mbus_fmt,
+    .s_mbus_fmt             = ov5640_s_mbus_fmt,
 };
 
 /**
  * pad ops
  */
-static int ov5645_s_fmt(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh,
+static int ov5640_s_fmt(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh,
         struct v4l2_subdev_format *fmt)
 {
     struct v4l2_mbus_framefmt *mf = &fmt->format;
     printk("%s: %dx%d\n", __func__, mf->width, mf->height);
-    return ov5645_s_mbus_fmt(sd, mf);
+    return ov5640_s_mbus_fmt(sd, mf);
 }
 
-static const struct v4l2_subdev_pad_ops ov5645_subdev_pad_ops = {
-    .set_fmt    = ov5645_s_fmt,
+static const struct v4l2_subdev_pad_ops ov5640_subdev_pad_ops = {
+    .set_fmt    = ov5640_s_fmt,
 };
 
 /**
  * subdev ops
  */
-static const struct v4l2_subdev_ops ov5645_subdev_ops = {
-    .core   = &ov5645_subdev_core_ops,
-    .video  = &ov5645_subdev_video_ops,
-    .pad    = &ov5645_subdev_pad_ops,
+static const struct v4l2_subdev_ops ov5640_subdev_ops = {
+    .core   = &ov5640_subdev_core_ops,
+    .video  = &ov5640_subdev_video_ops,
+    .pad    = &ov5640_subdev_pad_ops,
 };
 
 /**
  * media_entity_operations
  */
-static int ov5645_link_setup(struct media_entity *entity,
+static int ov5640_link_setup(struct media_entity *entity,
         const struct media_pad *local,
         const struct media_pad *remote, u32 flags)
 {
@@ -1782,61 +1782,28 @@ static int ov5645_link_setup(struct media_entity *entity,
     return 0;
 }
 
-static const struct media_entity_operations ov5645_media_ops = {
-    .link_setup = ov5645_link_setup,
+static const struct media_entity_operations ov5640_media_ops = {
+    .link_setup = ov5640_link_setup,
 };
 
 /****************************************************************************************
  * initialize
  */
-static void ov5645_priv_init(struct ov5645_priv * priv)
+static void ov5640_priv_init(struct ov5640_priv * priv)
 {
-    priv->model = V4L2_IDENT_OV5645;
+    priv->model = V4L2_IDENT_OV5640;
     priv->prev_capt_mode = PREVIEW_MODE;
     priv->timeperframe.denominator = 12;//30;
     priv->timeperframe.numerator = 1;
-    priv->win = &ov5645_win_svga;
+    priv->win = &ov5640_win_svga;
 }
 
-static int ov5645_video_probe(struct i2c_client *client)
+static int ov5640_video_probe(struct i2c_client *client)
 {
 	int ret;
 	u8 id_high, id_low;
 	u16 id;
-//  added by yang and hoping 
-        
-// power up
-        struct regulator *camera_power_1p5V = NULL;
-        struct regulator *camera_power_2p8V = NULL;
-
-        gpio_request(CAMERA_PD0,"CAMERA_PD0");
-        gpio_request(CAMERA_RST,"CAMERA_RST");
-        
-        gpio_direction_output(CAMERA_PD0, 1);
-        mdelay(5);
-
-        camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
-        camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
-
-        regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
-        regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);
-        printk(KERN_ALERT "#####: camera_power_1.5V...");
-        regulator_enable(camera_power_2p8V);
-        mdelay(5);
-        regulator_enable(camera_power_1p5V);
-      
-// reset
-        mdelay(10);
-        gpio_direction_output(CAMERA_PD0, 0);
-// set CLK
-        nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
-        mdelay(5);
-        gpio_direction_output(CAMERA_RST, 1);
-        mdelay(30);
-
-	gpio_free(CAMERA_PD0);
-        gpio_free(CAMERA_RST);
-//  end
+    printk("####: %s .............\n", __func__);
 	/* Read sensor Model ID */
 	ret = reg_read(client, 0x300a, &id_high);
 	if (ret < 0)
@@ -1864,39 +1831,39 @@ static int ov5645_video_probe(struct i2c_client *client)
 	return 0;
 }
 
-static int ov5645_probe(struct i2c_client *client, const struct i2c_device_id *id)
+static int ov5640_probe(struct i2c_client *client, const struct i2c_device_id *id)
 {
-    struct ov5645_priv *priv;
+    struct ov5640_priv *priv;
     struct v4l2_subdev *sd;
     int ret;
 
-    priv = kzalloc(sizeof(struct ov5645_priv), GFP_KERNEL);
+    priv = kzalloc(sizeof(struct ov5640_priv), GFP_KERNEL);
     if (!priv)
         return -ENOMEM;
 
 
     printk("%s...................................\n",__func__);
-    ov5645_priv_init(priv);
+    ov5640_priv_init(priv);
 
     sd = &priv->subdev;
     strcpy(sd->name, MODULE_NAME);
 
-    ov5645_video_probe(client);
+    ov5640_video_probe(client);
 
     /* register subdev */
-    v4l2_i2c_subdev_init(sd, client, &ov5645_subdev_ops);
+    v4l2_i2c_subdev_init(sd, client, &ov5640_subdev_ops);
 
     sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
     priv->pad.flags = MEDIA_PAD_FL_SOURCE;
     sd->entity.type = MEDIA_ENT_T_V4L2_SUBDEV_SENSOR;
-    sd->entity.ops  = &ov5645_media_ops;
+    sd->entity.ops  = &ov5640_media_ops;
     if (media_entity_init(&sd->entity, 1, &priv->pad, 0)) {
         dev_err(&client->dev, "%s: failed to media_entity_init()\n", __func__);
         kfree(priv);
         return -ENOENT;
     }
 
-    ret = ov5645_initialize_ctrls(priv);
+    ret = ov5640_initialize_ctrls(priv);
     if (ret < 0) {
         printk(KERN_ERR "%s: failed to initialize controls\n", __func__);
         kfree(priv);
@@ -1906,7 +1873,7 @@ static int ov5645_probe(struct i2c_client *client, const struct i2c_device_id *i
     return 0;
 }
 
-static int ov5645_remove(struct i2c_client *client)
+static int ov5640_remove(struct i2c_client *client)
 {
     struct v4l2_subdev *sd = i2c_get_clientdata(client);
     v4l2_device_unregister_subdev(sd);
@@ -1916,24 +1883,24 @@ static int ov5645_remove(struct i2c_client *client)
     return 0;
 }
 
-static const struct i2c_device_id ov5645_id[] = {
+static const struct i2c_device_id ov5640_id[] = {
     { MODULE_NAME, 0 },
     { }
 };
 
-MODULE_DEVICE_TABLE(i2c, ov5645_id);
+MODULE_DEVICE_TABLE(i2c, ov5640_id);
 
-static struct i2c_driver ov5645_i2c_driver = {
+static struct i2c_driver ov5640_i2c_driver = {
     .driver = {
         .name = MODULE_NAME,
     },
-    .probe    = ov5645_probe,
-    .remove   = ov5645_remove,
-    .id_table = ov5645_id,
+    .probe    = ov5640_probe,
+    .remove   = ov5640_remove,
+    .id_table = ov5640_id,
 };
 
-module_i2c_driver(ov5645_i2c_driver);
+module_i2c_driver(ov5640_i2c_driver);
 
-MODULE_DESCRIPTION("SoC Camera driver for ov5645");
+MODULE_DESCRIPTION("SoC Camera driver for ov5640");
 MODULE_AUTHOR("caichsh(caichsh@artekmicro.com)");
 MODULE_LICENSE("GPL v2");

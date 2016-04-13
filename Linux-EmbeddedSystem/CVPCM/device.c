@@ -1020,7 +1020,7 @@ static bool dvp_camera_power_state_changed(void)
 }
 
 static struct i2c_board_info dvp_i2c_camera = {
-        I2C_BOARD_INFO("OV5645_DVP", 0x78>>1),
+        I2C_BOARD_INFO("OV5640", 0x78>>1),
 };
 
 // added by yang 2016.4
@@ -1756,70 +1756,15 @@ void __init nxp_board_devs_register(void)
 	#endif
 #endif
 
-#if defined(CONFIG_DM9000) || defined(CONFIG_DM9000_MODULE)
-	printk("plat: add device dm9000 net\n");
-	platform_device_register(&dm9000_plat_device);
-#endif
-
-#if defined(CONFIG_BACKLIGHT_PWM)
-	printk("plat: add backlight pwm device\n");
-	platform_device_register(&bl_plat_device);
-#endif
-
 #if defined(CONFIG_MTD_NAND_NXP) || defined(CONFIG_NXP_FTL)
 	platform_device_register(&nand_plat_device);
 #endif
 
-#if defined(CONFIG_KEYBOARD_NXP_KEY) || defined(CONFIG_KEYBOARD_NXP_KEY_MODULE)
-	printk("plat: add device keypad\n");
-	platform_device_register(&key_plat_device);
-#endif
 
 #if defined(CONFIG_I2C_NXP) || defined (CONFIG_I2C_SLSI)
     platform_add_devices(i2c_devices, ARRAY_SIZE(i2c_devices));
 #endif
 
-//TK TP
-#if defined(CONFIG_TOUCHSCREEN_FT5X0X)
-	printk("plat: add touch(ft5x06) device\n");
-	i2c_register_board_info(TP_I2C_BUS, &ft5x0x_i2c_bdi, 1);	
-#endif
-
-#if defined(CONFIG_TOUCHSCREEN_GOODIX)
-	printk("plat: add touch(goodix) device\n");
-	i2c_register_board_info(TP_I2C_BUS, &Goodix_i2c_bdi, 1);	
-#endif
-
-//added by rpdzkj ivy for bma2x2 2015.11.12	
-#if defined(CONFIG_SENSORS_BMA2X2)
-	i2c_register_board_info(BMA22X_I2C_BUS, &bma22x_i2c_bdi, 1);	
-#endif
-//end ivy
-//rpdzkj sound for mxliao,at 2010-10-23
-#if defined(CONFIG_SND_CODEC_WM8960) || defined(CONFIG_SND_CODEC_WM8976_MODULE)
-
-	printk("plat: add device asoc-wm8976\n");
-	i2c_register_board_info(WM8976_I2C_BUS, &wm8976_i2c_bdi, 1);
-	platform_device_register(&wm8976_dai);
-#endif
-
-#if defined(CONFIG_SND_CODEC_ALC5623) || defined(CONFIG_SND_CODEC_ALC5623_MODULE)
-	printk("plat: add device asoc-alc5623\n");
-	i2c_register_board_info(0, &alc5623_i2c_bdi, 1);
-	platform_device_register(&alc5623_dai);
-#endif
-
-#if defined(CONFIG_SND_SPDIF_TRANSCIEVER) || defined(CONFIG_SND_SPDIF_TRANSCIEVER_MODULE)
-	printk("plat: add device spdif playback\n");
-	platform_device_register(&spdif_transciever);
-	platform_device_register(&spdif_trans_dai);
-#endif
-
-#if defined(CONFIG_SND_CODEC_ES8316) || defined(CONFIG_SND_CODEC_ES8316_MODULE)
-	printk("plat: add device asoc-es8316\n");
-	i2c_register_board_info(ES8316_I2C_BUS, &es8316_i2c_bdi, 1);
-	platform_device_register(&es8316_dai);
-#endif
 
 #if defined(CONFIG_V4L2_NXP) || defined(CONFIG_V4L2_NXP_MODULE)
     printk("plat: add device nxp-v4l2\n");
@@ -1831,30 +1776,7 @@ void __init nxp_board_devs_register(void)
     printk("plat: register spidev\n");
 #endif
 
-#if defined(CONFIG_TOUCHSCREEN_GSLX680)
-	printk("plat: add touch(gslX680) device\n");
-	i2c_register_board_info(GSLX680_I2C_BUS, &gslX680_i2c_bdi, 1);
-#endif
 
-#if defined(CONFIG_SENSORS_MMA865X) || defined(CONFIG_SENSORS_MMA865X_MODULE)
-	printk("plat: add g-sensor mma865x\n");
-	i2c_register_board_info(2, &mma865x_i2c_bdi, 1);
-#elif defined(CONFIG_SENSORS_MMA7660) || defined(CONFIG_SENSORS_MMA7660_MODULE)
-	printk("plat: add g-sensor mma7660\n");
-	i2c_register_board_info(MMA7660_I2C_BUS, &mma7660_i2c_bdi, 1);
-#endif
-
-#if defined(CONFIG_RFKILL_NXP)
-    printk("plat: add device rfkill\n");
-    platform_device_register(&rfkill_device);
-#endif
-
-
-#if 0//defined(CONFIG_ARM_NXP_CPUFREQ_BY_RESOURCE)
-	back_camera_power_enable(0);
-	front_camera_power_enable(0);
-	camera_power_control(0);
-#endif
 	/* END */
 	printk("\n");
 }

@@ -111,7 +111,7 @@ struct nxp_cpufreq_plat_data dfs_plat_data = {
 };
 */
 
-#define HIGH_PERFORMANCE 1//define by rpdzkj jeff
+#define HIGH_PERFORMANCE 0//define by rpdzkj jeff
 
 static unsigned long dfs_freq_table[][2] = {
 #if HIGH_PERFORMANCE
@@ -1725,6 +1725,19 @@ void __init nxp_board_devs_register(void)
 	printk("plat: add dynamic frequency (pll.%d)\n", dfs_plat_data.pll_dev);
 	platform_device_register(&dfs_plat_device);
 #endif
+
+#if defined(CONFIG_MMC_DW)
+	#ifdef CONFIG_MMC_NXP_CH0
+	nxp_mmc_add_device(0, &_dwmci0_data);
+	#endif
+    #ifdef CONFIG_MMC_NXP_CH2
+	nxp_mmc_add_device(2, &_dwmci2_data);
+	#endif
+    #ifdef CONFIG_MMC_NXP_CH1
+	nxp_mmc_add_device(1, &_dwmci1_data);
+	#endif
+#endif
+
 //rpdzkj eth for mxliao ,at 2015-10-23
 #if defined(CONFIG_NXPMAC_ETH) 
     printk("plat: add device nxp-gmac\n"); 
@@ -1743,18 +1756,6 @@ void __init nxp_board_devs_register(void)
 #endif
 //TK MIPI	
 //END
-
-#if defined(CONFIG_MMC_DW)
-	#ifdef CONFIG_MMC_NXP_CH0
-	nxp_mmc_add_device(0, &_dwmci0_data);
-	#endif
-    #ifdef CONFIG_MMC_NXP_CH2
-	nxp_mmc_add_device(2, &_dwmci2_data);
-	#endif
-    #ifdef CONFIG_MMC_NXP_CH1
-	nxp_mmc_add_device(1, &_dwmci1_data);
-	#endif
-#endif
 
 #if defined(CONFIG_MTD_NAND_NXP) || defined(CONFIG_NXP_FTL)
 	platform_device_register(&nand_plat_device);

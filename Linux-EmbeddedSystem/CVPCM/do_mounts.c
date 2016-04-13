@@ -519,6 +519,7 @@ void __init prepare_namespace(void)
 	 * for the touchpad of a laptop to initialize.
 	 */
 	wait_for_device_probe();
+    mdelay(500);
 
 	md_run_setup();
 
@@ -551,6 +552,7 @@ void __init prepare_namespace(void)
 
 	if (is_floppy && rd_doload && rd_load_disk(0))
 		ROOT_DEV = Root_RAM0;
+    printk(KERN_ALERT "####: mount_alert in %s ", __func__);
 
 	mount_root();
 out:

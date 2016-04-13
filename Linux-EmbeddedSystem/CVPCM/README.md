@@ -18,3 +18,6 @@ in /linux/kernel/arch/arm/plat-s5p6818/drone/
 driver for axp, the voltage controller  
 in /linux/kernel/arch/arm/plat-s5p6818/drone/include/
 
+* do_mounts.c 
+in linux/kernel/init/
+

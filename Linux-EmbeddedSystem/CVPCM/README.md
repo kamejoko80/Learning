@@ -19,5 +19,6 @@ driver for axp, the voltage controller
 in /linux/kernel/arch/arm/plat-s5p6818/drone/include/
 
 * do_mounts.c 
+delay before mmc mounting to avoid its reset
 in linux/kernel/init/
 

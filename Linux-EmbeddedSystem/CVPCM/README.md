@@ -7,6 +7,7 @@ in /linux/kernel/
 * ov5645.c  
 driver for OV5640  
 from /linux/kernel/drivers/media/video/  
+Driver Structure: ![OV5640_DRIVER](https://lh3.googleusercontent.com/W3xmQLIX32a9APJk7z5zPvNkAnpS1QPinV1XpqXa7c8c4i-QVZA2R1dfUtjRf7ZPqLD71Krj-FJwPQ0vGDc5n7RtyQE)
 Reference: [http://blog.csdn.net/hyanglu1573/article/details/12874527](http://blog.csdn.net/hyanglu1573/article/details/12874527)
 
 

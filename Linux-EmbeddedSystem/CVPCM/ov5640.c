@@ -2220,6 +2220,7 @@ static int ov5640_video_probe(struct i2c_client *client)
 
     if (regulator_get_voltage(camera_power_2p8V) != 2800000)
     {
+        printk("##: OV5640 set voltage");
         regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
     
         regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);

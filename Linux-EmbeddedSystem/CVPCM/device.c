@@ -1020,11 +1020,11 @@ static bool dvp_camera_power_state_changed(void)
 }
 
 static struct i2c_board_info dvp_i2c_camera = {
-        I2C_BOARD_INFO("OV5640", 0x78>>1),
+        I2C_BOARD_INFO("OV5640_DVP", 0x78>>1),
 };
 
 // added by yang 2016.4
-#define MODULE_NAME "OV5645"
+#define MODULE_NAME "OV5640_MIPI"
 #include <linux/i2c.h>
 static struct i2c_board_info mipi_i2c_camera = {
 
@@ -1791,7 +1791,7 @@ void __init nxp_board_devs_register(void)
 
 
 #if defined(CONFIG_V4L2_NXP) || defined(CONFIG_V4L2_NXP_MODULE)
-    printk("plat: add device nxp-v4l2\n");
+    printk(KERN_ALERT "#####: plat: add device nxp-v4l2\n");
     platform_device_register(&nxp_v4l2_dev);
 #endif
 

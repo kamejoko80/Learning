@@ -1010,9 +1010,10 @@ int register_nxp_capture(struct nxp_capture *me)
         goto error_sensor;
     }
 #else
+
+    printk(KERN_ALERT"### if register sensor subdev\n");
     if (NULL == _register_sensor(me, me->platdata->sensor)) {
-        printk(KERN_ALERT"%s: can't register sensor subdev\n", __func__);
-        //pr_err("%s: can't register sensor subdev\n", __func__);
+        pr_err("%s: can't register sensor subdev\n", __func__);
         goto error_sensor;
     }
 #endif

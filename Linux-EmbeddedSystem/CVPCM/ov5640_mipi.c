@@ -1890,7 +1890,7 @@ static int ov5645_probe(struct i2c_client *client, const struct i2c_device_id *i
     ov5645_video_probe(client);
 
     /* register subdev */
-    v4l2_i2c_subdev_init(sd, client, &ov5645_subdev_ops);
+    //v4l2_i2c_subdev_init(sd, client, &ov5645_subdev_ops);
 
     sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
     priv->pad.flags = MEDIA_PAD_FL_SOURCE;

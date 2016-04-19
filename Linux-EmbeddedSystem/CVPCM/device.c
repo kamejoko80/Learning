@@ -1041,7 +1041,7 @@ static struct nxp_v4l2_i2c_board_info sensor[] = {
     },
     {
         .board_info = &dvp_i2c_camera,
-        .i2c_adapter_id = 1,
+        .i2c_adapter_id = 0,
     },
 
 };
@@ -1061,7 +1061,8 @@ static struct nxp_mipi_csi_platformdata csi = {
 };
 
 static struct nxp_capture_platformdata capture_plat_data = {
-    //{
+    #if 0
+    {
     
         /* mipi_camera 656 interface */
         .module = 0, 
@@ -1095,10 +1096,11 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .stop_delay_ms  = 0,
         },
         .csi = &csi,
-    //},
+    },
+    #endif
     
-    #if 0
-    {
+    #if 1
+    //{
         // dvp_camera 601 interface 
         .module = 1,
         .sensor = &sensor[1],	//  sensor[0]:mipi  sensor[1] : dvp;
@@ -1129,7 +1131,7 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .start_delay_ms = 0,
             .stop_delay_ms  = 0,
         },
-    },
+    //},
     #endif
 
     //{ 0, NULL, 0, },
@@ -1218,8 +1220,6 @@ static struct mipi_reg_val mipi_init_data[]=
 
 
 };
-
-
 
 
 static void  mipilcd_dcs_long_write(U32 cmd, U32 ByteCount, U8* pByteData )

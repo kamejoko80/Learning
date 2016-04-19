@@ -1,4 +1,4 @@
-/*#define DEBUG 0*/
+#define DEBUG 1
 
 #include <linux/kernel.h>
 #include <linux/list.h>
@@ -934,7 +934,10 @@ error_csi:
     nxp_decimator_cleanup(&me->decimator);
 error_decimator:
 #endif
+
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     nxp_vin_clipper_cleanup(&me->vin_clipper);
+#endif
 error_vin:
     kfree(me);
     return NULL;
@@ -950,8 +953,9 @@ void release_nxp_capture(struct nxp_capture *me)
 #ifdef CONFIG_NXP_CAPTURE_DECIMATOR
     nxp_decimator_cleanup(&me->decimator);
 #endif
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     nxp_vin_clipper_cleanup(&me->vin_clipper);
-
+#endif
     kfree(me);
 }
 
@@ -976,11 +980,13 @@ int register_nxp_capture(struct nxp_capture *me)
     }
 #endif
 
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     ret = nxp_vin_clipper_register(&me->vin_clipper);
     if (ret < 0) {
         pr_err("%s: failed to nxp_vin_clipper_register()\n", __func__);
         goto error_vin;
     }
+#endif
 
 #ifdef CONFIG_NXP_CAPTURE_DECIMATOR
     ret = nxp_decimator_register(&me->decimator);
@@ -1005,7 +1011,8 @@ int register_nxp_capture(struct nxp_capture *me)
     }
 #else
     if (NULL == _register_sensor(me, me->platdata->sensor)) {
-        pr_err("%s: can't register sensor subdev\n", __func__);
+        printk(KERN_ALERT"%s: can't register sensor subdev\n", __func__);
+        //pr_err("%s: can't register sensor subdev\n", __func__);
         goto error_sensor;
     }
 #endif
@@ -1028,7 +1035,11 @@ error_sensor:
     nxp_decimator_unregister(&me->decimator);
 error_decimator:
 #endif
+
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     nxp_vin_clipper_unregister(&me->vin_clipper);
+#endif
+
 error_vin:
 #ifdef CONFIG_NXP_CAPTURE_MIPI_CSI
     if (csi_enabled)
@@ -1045,7 +1056,11 @@ void unregister_nxp_capture(struct nxp_capture *me)
 #ifdef CONFIG_NXP_CAPTURE_DECIMATOR
     nxp_decimator_unregister(&me->decimator);
 #endif
+
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     nxp_vin_clipper_unregister(&me->vin_clipper);
+#endif
+
 #ifdef CONFIG_NXP_CAPTURE_MIPI_CSI
     if (me->interface_type == NXP_CAPTURE_INF_CSI)
         nxp_csi_unregister(&me->csi);
@@ -1064,11 +1079,13 @@ int suspend_nxp_capture(struct nxp_capture *me)
         return ret;
     }
 #endif
+#ifdef CONFIG_NXP_CAPTURE_CLIPPER
     ret = nxp_vin_clipper_suspend(&me->vin_clipper);
     if (ret) {
         PM_DBGOUT("%s: failed to nxp_vin_clipper_suspend() ret %d\n", __func__, ret);
         return ret;
     }
+#endif
 #ifdef CONFIG_NXP_CAPTURE_MIPI_CSI
     if (me->interface_type == NXP_CAPTURE_INF_CSI) {
         ret = nxp_csi_suspend(&me->csi);

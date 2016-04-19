@@ -1046,12 +1046,27 @@ static struct nxp_v4l2_i2c_board_info sensor[] = {
 
 };
 
+static struct nxp_mipi_csi_platformdata csi = {
+    .module = 0,
+    .clk_rate = 56000000,
+    .lanes = 2,
+    .alignment = 0, // not set
+    .hs_settle = 0, // not set
+    .width = 1280,
+    .height = 960,
+    .fixed_phy_vdd = true,
+    .irq = 0, // not set
+    .base = NULL, //not set
+    .phy_enable = NULL, // not set
+};
+
 static struct nxp_capture_platformdata capture_plat_data = {
     //{
+    
         /* mipi_camera 656 interface */
         .module = 0, 
         .sensor = &sensor[0], // sensor[0]:mipi; sensor[1]:dvp 
-        .type = NXP_CAPTURE_INF_PARALLEL,
+        .type = NXP_CAPTURE_INF_CSI,
         .parallel = {
             /* for 656 */
             .is_mipi        = true,
@@ -1079,12 +1094,13 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .start_delay_ms = 0,
             .stop_delay_ms  = 0,
         },
+        .csi = &csi,
     //},
     
-    /*
+    #if 0
     {
         // dvp_camera 601 interface 
-        .module = 2,
+        .module = 1,
         .sensor = &sensor[1],	//  sensor[0]:mipi  sensor[1] : dvp;
         .type = NXP_CAPTURE_INF_PARALLEL,
         .parallel = {
@@ -1114,10 +1130,10 @@ static struct nxp_capture_platformdata capture_plat_data = {
             .stop_delay_ms  = 0,
         },
     },
-    
+    #endif
 
-    { 0, NULL, 0, },
-    */
+    //{ 0, NULL, 0, },
+    
 };
 
 

@@ -1,7 +1,6 @@
 # Computer Vision Passenger Control Module
 
 #### TODO:
-- [ ] Try insmod or other something to register ov5640 driver
 - [ ] Figure out how video_register_device() work and try to add it into ov5640 driver
 - [ ] To find the ov5640 device in /dev/video\* using `v4l2-compliance -d`
 - [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot

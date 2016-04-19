@@ -1,4 +1,4 @@
-PROG = mouse-event 
+PROG = $(file_name) 
 SRC = ${PROG:%=%.cpp}
 TARGET = $(PROG)
 

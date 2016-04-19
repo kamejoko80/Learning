@@ -871,26 +871,27 @@ static void camera_power_control(int enable)
 #else
 static void camera_power_control(int enable)
 {
-    struct regulator *cam_core_18V = NULL;
+    struct regulator *cam_core_28V = NULL;
+    printk(KERN_ALERT "######enter camera power control func");
     
     if (enable && camera_power_enabled)
         return;
     if (!enable && !camera_power_enabled)
         return;
 
-    cam_core_18V = regulator_get(NULL, "vcam1_1.8V");
-    if (IS_ERR(cam_core_18V)) {
-        printk(KERN_ERR "%s: failed to regulator_get() for vcam1_1.8V", __func__);
+    cam_core_28V = regulator_get(NULL, "vcam1_2.8V");
+    if (IS_ERR(cam_core_28V)) {
+        printk(KERN_ERR "%s: failed to regulator_get() for vcam1_2.8V", __func__);
         return;
     }
     printk("%s: %d\n", __func__, enable);
     if (enable) {
-        regulator_enable(cam_core_18V);
+        regulator_enable(cam_core_28V);
     } else {
-        regulator_disable(cam_core_18V);
+        regulator_disable(cam_core_28V);
     }
 
-    regulator_put(cam_core_18V);
+    regulator_put(cam_core_28V);
 
     camera_power_enabled = enable ? true : false;
 }
@@ -1045,9 +1046,8 @@ static struct nxp_v4l2_i2c_board_info sensor[] = {
 
 };
 
-#if 1
-static struct nxp_capture_platformdata capture_plat_data[] = {
-    {
+static struct nxp_capture_platformdata capture_plat_data = {
+    //{
         /* mipi_camera 656 interface */
         .module = 0, 
         .sensor = &sensor[0], // sensor[0]:mipi; sensor[1]:dvp 
@@ -1079,8 +1079,9 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
             .start_delay_ms = 0,
             .stop_delay_ms  = 0,
         },
-    },
+    //},
     
+    /*
     {
         // dvp_camera 601 interface 
         .module = 2,
@@ -1113,12 +1114,12 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
             .stop_delay_ms  = 0,
         },
     },
+    
 
     { 0, NULL, 0, },
+    */
 };
-#else  // front ok 1106
 
-#endif
 
 
 #if 1
@@ -1442,7 +1443,7 @@ static struct nxp_out_platformdata out_plat_data = {
 };
 
 static struct nxp_v4l2_platformdata v4l2_plat_data = {
-    .captures = &capture_plat_data[0],
+    .captures = &capture_plat_data,//[0],
     .out = &out_plat_data,
 };
 

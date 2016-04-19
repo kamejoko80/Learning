@@ -32,4 +32,7 @@ ln from `/linux/kernel/init/`
 ln from `/linux/kernel/drivers/media/video/nexell/capture/`
 
 * nxp-v4l2-platformdata.h
-cp from `/linux/kernel/kernel-3.4.39/arch/arm/mach-s5p6818/include/mach/`
+cp from `/linux/kernel/arch/arm/mach-s5p6818/include/mach/`
+
+* nxp-v4l2.c
+cp from `/linux/kernel/drivers/media/video/nexell/`

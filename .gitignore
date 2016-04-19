@@ -5,6 +5,8 @@
 *py[co]
 *.class     # compiled java file
 *.asv       # autosaved matlab file
+*.swp       # vim tmp file for unsave change
+
 
 /TODO		# ignore all files in /TODO
 

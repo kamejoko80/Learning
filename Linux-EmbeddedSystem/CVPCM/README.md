@@ -24,15 +24,16 @@ ln from `/linux/kernel/arch/arm/plat-s5p6818/drone/`
 driver for axp, the voltage controller  
 ln from `/linux/kernel/arch/arm/plat-s5p6818/drone/include/`
 
-* do_mounts.c 
-delay before mmc mounting to avoid its reset
+* do_mounts.c  
+delay before mmc mounting to avoid its reset  
 ln from `/linux/kernel/init/`
 
-* nxp_capture.c
+* nxp_capture.c  
 ln from `/linux/kernel/drivers/media/video/nexell/capture/`
 
-* nxp-v4l2-platformdata.h
+* nxp-v4l2-platformdata.h  
 cp from `/linux/kernel/arch/arm/mach-s5p6818/include/mach/`
 
-* nxp-v4l2.c
+* nxp-v4l2.c  
 cp from `/linux/kernel/drivers/media/video/nexell/`
+

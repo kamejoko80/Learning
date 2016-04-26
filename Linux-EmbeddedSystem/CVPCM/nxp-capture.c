@@ -706,8 +706,10 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
             return NULL;
         }
 
+        //printk(KERN_ALERT "##v4l2_i2c_new_subdev begins\n");
         sensor = v4l2_i2c_new_subdev_board(me->get_v4l2_device(me),
                 adapter, board_info->board_info, NULL);
+        //printk(KERN_ALERT "##v4l2_i2c_new_subdev ends\n");
         if (!sensor) {
             pr_err("%s: unable to register subdev %s\n",
                     __func__, board_info->board_info->type);
@@ -875,8 +877,10 @@ struct nxp_capture *create_nxp_capture(int index,
 #endif
 
     ret = nxp_vin_clipper_init(&me->vin_clipper, &pdata->parallel);
+    printk(KERN_ALERT "##%s: nxp_vin_clipper_init()\n", __func__);
     if (ret < 0) {
-        pr_err("%s: failed to nxp_vin_clipper_init()\n", __func__);
+        //pr_err("%s: failed to nxp_vin_clipper_init()\n", __func__);
+        printk(KERN_ALERT "##%s: failed to nxp_vin_clipper_init()\n", __func__);
         goto error_vin;
     }
 

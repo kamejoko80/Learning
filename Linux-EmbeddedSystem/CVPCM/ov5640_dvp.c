@@ -61,7 +61,7 @@ static struct i2c_board_info asoc_i2c_camera = {
 #endif
 
 #define PID                 0x02 /* Product ID Number  *///caichsh
-#define OV5640              0x53
+//#define OV5640              0x53
 #define OUTTO_SENSO_CLOCK   24000000
 #define NUM_CTRLS           11
 #define V4L2_IDENT_OV5640   64188
@@ -1977,7 +1977,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
     struct ov5640_priv *priv = to_priv(sd);
     int ret = 0;
 
-    printk("%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
+    printk("##%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
     ov5640_video_probe(client);
     if (enable) {
         if (!priv->win || !priv->cfmt) {
@@ -2137,6 +2137,20 @@ static int ov5640_s_mbus_fmt(struct v4l2_subdev *sd, struct v4l2_mbus_framefmt *
     return ret;
 }
 
+static int ov5640_cropcap(struct v4l2_subdev *sd, struct v4l2_cropcap *a)
+{
+    a->bounds.left          = 0;
+    a->bounds.top           = 0;
+    a->bounds.width         = SVGA_WIDTH;
+    a->bounds.height        = SVGA_HEIGHT;
+    a->defrect          = a->bounds;
+    a->type             = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    a->pixelaspect.numerator    = 1;
+    a->pixelaspect.denominator  = 1;
+
+    return 0;
+}
+
 static const struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
     .s_stream               = ov5640_s_stream,
     .enum_framesizes        = ov5640_enum_framesizes,
@@ -2144,6 +2158,9 @@ static const struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
     .g_mbus_fmt             = ov5640_g_mbus_fmt,
     .try_mbus_fmt           = ov5640_try_mbus_fmt,
     .s_mbus_fmt             = ov5640_s_mbus_fmt,
+    //.s_crop     = ov5642_s_crop,
+    //.g_crop     = ov5642_g_crop,
+    //.cropcap    = ov5640_cropcap,
 };
 
 /**

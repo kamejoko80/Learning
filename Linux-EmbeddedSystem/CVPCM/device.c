@@ -974,7 +974,14 @@ static int dvp_camera_power_enable(bool on)
     if (on) {
         //back_camera_power_enable(0);
         if (!is_dvp_camera_enabled) {
-            //camera_power_control(1);
+            camera_power_control(1);
+            /* First RST signal to low */
+            nxp_soc_gpio_set_out_value(reset_io, 1);
+            nxp_soc_gpio_set_io_dir(reset_io, 1);
+            nxp_soc_gpio_set_io_func(reset_io, nxp_soc_gpio_get_altnum(io));
+            nxp_soc_gpio_set_out_value(reset_io, 0);
+            mdelay(1);
+            
             // PWDN signal High to Low 
             nxp_soc_gpio_set_out_value(io, 0);
             nxp_soc_gpio_set_io_dir(io, 1);
@@ -1101,28 +1108,28 @@ static struct nxp_capture_platformdata capture_plat_data = {
     
     #if 1
     //{
-        // dvp_camera 601 interface 
-        .module = 1,
+        // dvp_camera 656 interface 
+        .module = 0,
         .sensor = &sensor[1],	//  sensor[0]:mipi  sensor[1] : dvp;
         .type = NXP_CAPTURE_INF_PARALLEL,
         .parallel = {
             .is_mipi        = false,
-            .external_sync  = true,  //if external_sync is used(this means that value is true), 601 format else 656 format
-            .h_active       = 640,
-            .h_frontporch   = 1,
-            .h_syncwidth    = 1,
-            .h_backporch    = 0,
-            .v_active       = 480,
+            .external_sync  = false,  //if external_sync is used(this means that value is true), 601 format else 656 format
+            .h_active       = 1280,
+            .h_frontporch   = 0,
+            .h_syncwidth    = 0,
+            .h_backporch    = 2,
+            .v_active       = 960,
             .v_frontporch   = 0,
-            .v_syncwidth    = 1,
-            .v_backporch    = 0,
+            .v_syncwidth    = 0,
+            .v_backporch    = 13,
             .clock_invert   = false, 
             .port           = 0,
-            .data_order     = NXP_VIN_CBY0CRY1,//NXP_VIN_CRY1CBY0,//NXP_VIN_CBY0CRY1,
+            .data_order     = NXP_VIN_Y0CBY1CR,//NXP_VIN_CRY1CBY0,//NXP_VIN_CBY0CRY1,
             .interlace      = false,
             .clk_rate       = 24000000,
             .late_power_down = true,
-            .power_enable   =dvp_camera_power_enable,// 
+            .power_enable   = dvp_camera_power_enable,// 
             .power_state_changed = dvp_camera_power_state_changed,//
             .set_clock      = camera_common_set_clock,
             .setup_io       = camera_common_vin_setup_io,

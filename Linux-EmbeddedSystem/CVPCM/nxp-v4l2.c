@@ -143,7 +143,8 @@ static int __devinit nxp_v4l2_probe(struct platform_device *pdev)
         /* capture = create_nxp_capture(i, capture_pdata); */
         capture = create_nxp_capture(i, capture_pdata->module, capture_pdata);
         if (!capture) {
-            pr_err("%s: failed to %dth create_nxp_capture()\n", __func__, i);
+            //pr_err("%s: failed to %dth create_nxp_capture()\n", __func__, i);
+            printk(KERN_ALERT "%s: failed to %dth create_nxp_capture()\n", __func__, i);
             ret = -EINVAL;
             goto err_capture_create;
         }

@@ -1001,26 +1001,13 @@ int register_nxp_capture(struct nxp_capture *me)
 #endif
 
     /* find sensor subdev */
-#if 0
-    sensor_info = me->platdata->sensor;
-    if (!sensor_info) {
-        pr_err("%s: can't find sensor platdata\n", __func__);
-        goto error_sensor;
-    }
-
-    sensor = _register_sensor(me, sensor_info);
-    if (!sensor) {
+    
+    sensor = _register_sensor(me, me->platdata->sensor);
+    printk(KERN_ALERT"### sensor subdev registration \n");
+    if (NULL == sensor) {
         pr_err("%s: can't register sensor subdev\n", __func__);
         goto error_sensor;
     }
-#else
-
-    printk(KERN_ALERT"### if register sensor subdev\n");
-    if (NULL == _register_sensor(me, me->platdata->sensor)) {
-        pr_err("%s: can't register sensor subdev\n", __func__);
-        goto error_sensor;
-    }
-#endif
 
     // psw0523 fix for urbetter
     /* ret = request_irq(me->irq, &_irq_handler, IRQF_DISABLED, "nxp-capture", me); */

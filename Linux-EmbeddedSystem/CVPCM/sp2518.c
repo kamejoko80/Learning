@@ -3095,8 +3095,8 @@ static int sp2518_probe(struct i2c_client *client, const struct i2c_device_id *i
     int ret;
 
     priv = kzalloc(sizeof(struct sp2518_priv), GFP_KERNEL);
-    if (!priv)
-        return -ENOMEM;
+    //if (!priv)
+    //    return -ENOMEM;
 
     sp2518_priv_init(priv);
 
@@ -3112,6 +3112,7 @@ static int sp2518_probe(struct i2c_client *client, const struct i2c_device_id *i
     sd->entity.ops  = &sp2518_media_ops;
     if (media_entity_init(&sd->entity, 1, &priv->pad, 0)) {
         dev_err(&client->dev, "%s: failed to media_entity_init()\n", __func__);
+        printk(KERN_ERR "%s: failed to media_entity_init()\n", __func__);
         kfree(priv);
         return -ENOENT;
     }

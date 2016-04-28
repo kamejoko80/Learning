@@ -1,7 +1,9 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include "process.h"
-#include "initialization.h"
+
+#include "process.hpp"
+#include "initialization.hpp"
+
 using namespace std;
 using namespace cv;
 

@@ -1,12 +1,32 @@
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 
 public class Chapter03_exercise06_Josephus
 {
 	public static void main(String[] args)
 	{
-		System.out.println(josephus(5, 1));
-		System.out.println(josephus_1(1, 5));
+		Chapter03_exercise06_Josephus solution = new Chapter03_exercise06_Josephus();
+		for (Method m : solution.getClass().getDeclaredMethods())
+		{
+			if (m.getName().startsWith("j"))
+			{
+				long a = System.currentTimeMillis();
+				try
+				{
+					m.invoke(solution, 10000, 156);
+				}
+				catch (IllegalAccessException | InvocationTargetException e)
+				{
+					e.printStackTrace();
+				}
+				
+				long b = System.currentTimeMillis();
+				System.out.println(m.getName() + ":" + String.valueOf(b - a));
+			}
+		}
+		System.out.println(josephus(10000, 156));
+		System.out.println(josephus_1(10000, 156));
 		System.out.println();
 	}
 	
@@ -19,7 +39,7 @@ public class Chapter03_exercise06_Josephus
 		int out = 0;
 		for (int remain = n; remain > 1; remain--)
 		{
-			out = ((m % remain) + out) % remain;
+			out = (m + out) % remain;
 			circle.remove(out);
 		}
 		
@@ -38,7 +58,7 @@ public class Chapter03_exercise06_Josephus
 	    }
 	}
 	
-	public static int josephus_1(int m, int n)
+	public static int josephus_1(int n, int m)
 	{
         assert m >= 0 : "m should not be negative";
 

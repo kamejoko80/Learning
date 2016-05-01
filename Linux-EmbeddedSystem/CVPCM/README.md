@@ -1,10 +1,11 @@
 # Computer Vision Passenger Control Module
 
 #### TODO:
-- [x] Figure out how video_register_device() work
-- [ ] To find the ov5640 device in `/dev/video*`
-- [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot
-- [ ] Read video stream from ov5640 dvp/mipi
+- [x] Figure out how video_register_device() work,
+- [x] To find the ov5640 device in `/dev/video*` to prove it.
+- [ ] Try to link ov5640 subdev to Clipper host.
+- [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
+- [ ] Read video stream from ov5640 dvp/mipi.
 
 * .config  
 make config file  

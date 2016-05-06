@@ -944,7 +944,8 @@ static int nxp_vin_clipper_s_power(struct v4l2_subdev *sd, int on)
     u32 state;
     int module;
 
-    vmsg("%s: %d\n", __func__, on);
+    printk("## %s: %d\n", __func__, on);
+    //vmsg("%s: %d\n", __func__, on);
 
 	me = v4l2_get_subdevdata(sd);
 	if (!me) {
@@ -972,6 +973,8 @@ static int nxp_vin_clipper_s_power(struct v4l2_subdev *sd, int on)
         pr_err("%s error: invalid state(0x%x)\n", __func__, state);
         return -EINVAL;
     }
+
+    printk(KERN_ALERT "## %s, state(0x%x)\n", __func__, state);
 
     if (on) {
         if (me->platdata->setup_io)
@@ -1286,6 +1289,8 @@ static int nxp_vin_clipper_link_setup(struct media_entity *entity,
     struct v4l2_subdev *sd = media_entity_to_v4l2_subdev(entity);
     struct nxp_vin_clipper *me = v4l2_get_subdevdata(sd);
     struct nxp_capture *parent = nxp_vin_to_parent(me);
+    
+    printk(KERN_ALERT "## %s", __func__);
 
     switch (local->index | media_entity_type(remote->entity)) {
     case NXP_VIN_PAD_SINK | MEDIA_ENT_T_V4L2_SUBDEV:
@@ -1438,9 +1443,12 @@ static int _init_entities(struct nxp_vin_clipper *me)
     pads[NXP_VIN_PAD_SOURCE_DECIMATOR].flags = MEDIA_PAD_FL_SOURCE;
 
     entity->ops = &nxp_vin_clipper_media_ops;
+    
+    printk(KERN_ALERT "## %s: media_entity_init()\n", __func__);
     ret = media_entity_init(entity, NXP_VIN_PAD_MAX, pads, 0);
     if (ret < 0) {
-        pr_err("%s: failed to media_entity_init()\n", __func__);
+        printk(KERN_ALERT "## %s: failed to media_entity_init()\n", __func__);
+        //pr_err("%s: failed to media_entity_init()\n", __func__);
         return ret;
     }
 
@@ -1461,9 +1469,10 @@ static int _init_entities(struct nxp_vin_clipper *me)
 
     /* create link subdev to video node */
     ret = media_entity_create_link(entity, NXP_VIN_PAD_SOURCE_MEM,
-            &me->video->vdev.entity, 0, 0);
+            &me->video->vdev.entity, 0, MEDIA_LNK_FL_ENABLED);
     if (ret < 0) {
-        pr_err("%s: failed to media_entity_create_link()\n", __func__);
+        printk(KERN_ALERT "## fail to link vin clipper");
+        //pr_err("%s: failed to media_entity_create_link()\n", __func__);
         goto error_link;
     }
 

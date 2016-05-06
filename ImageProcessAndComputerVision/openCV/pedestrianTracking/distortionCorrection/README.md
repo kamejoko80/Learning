@@ -1,6 +1,6 @@
-# Image Registration
+# Image Distortion Correction
 
-
+* initialization.cpp  
 Before reading `initialization.h`, you had better read [the webpages](http://blog.sina.com.cn/s/blog_6249ce370100ezlf.html)  
 which will give you the basic knowledge of interpolation.
 
@@ -12,3 +12,5 @@ in the way of multipling them by 16.
 
 As a result,the value of $$f(i+u,j+v)$$ is multiplied by `16*16`,
 so we will divided the value by `16*16` in the end by the way of swift the value 8 bits right.
+
+* process.cpp  

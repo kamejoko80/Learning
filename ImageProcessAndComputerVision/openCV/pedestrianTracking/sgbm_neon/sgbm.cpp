@@ -1,17 +1,21 @@
 #include<opencv2/opencv.hpp>
 #include<iostream>
+
 using namespace cv;
 using namespace std;
+
 typedef uchar PixType;
 typedef short CostType;
 typedef short DispType;
 typedef cv::Point_<short> Point2s;
+
 enum { NR = 16, NR2 = NR / 2 };
 extern "C" void x_cost(short a,short* b,short* c,short* d,short*e,short*f,int g,short*h); 
 extern "C" void cost_cal(short* a,short* b,short* c,const short* d,const short* e,short *f,int g,short* h);
 extern "C" void l_cost(short a,short b,short c,short d,short* e,short* f,const short* g,short* h,short* i,int j);
 extern "C" void cost_init(int a,int b,int c,int d,PixType *e,PixType*f,PixType*g,short*h,int i);
 extern "C" void cost_final(int a,PixType * b,short* c,int d);
+
 struct StereoSGBMParams
 {
 	StereoSGBMParams()
@@ -748,9 +752,10 @@ void*do_compute(void*arg)
 	compute(data->img1,data->img2,data->disp,data->mindis,data->numdis);
 	pthread_exit(NULL);
 }
-void ComputeDisparity(Mat &image1,Mat &image2,Mat &disparity,int mindis,int numdis,int numthread=1)
+
+void ComputeDisparity(Mat &image1, Mat &image2, Mat &disparity, int mindis, int numdis, int numthread=1)
 {
-	if(numthread>1)
+	if(numthread > 1)
 	{
 		int height = image1.rows;
 		int width = image1.cols;

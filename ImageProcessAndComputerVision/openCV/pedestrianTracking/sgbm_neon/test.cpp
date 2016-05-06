@@ -1,14 +1,19 @@
 /*The parameters of function ComputeDisparity.
-image1:the left image(input). 
-	Compared to using GRAY image , using RGB image makes the quality better but the time consumes more.   
-image2:the right image(input).
-disparity:the disparity map(output).
-	Yon should normalize it before showing it in a window for that its type is CV_16S.If you just want to get the true disparity map for calculating the depth map,you should divide it by DISP_SCALE(Its value 		is 16 in sgbm.cpp) and then get the absolute number,e.g.,abs(disparity/16).
-mindis:the minmal value of disparity(input).
-	It should be negative number.Because in this program,we assume that point(x,y) in the left image corresponds point(x-d,y) in the right image,where x means the column,y means the row and d means the value 		of disparity.  
-numdis:The range of disparity(input).
+@image1 the left image(input). 
+	Compared to using GRAY image, using RGB image makes the quality better but the time consumes more.   
+@image2 the right image(input).
+@disparity the disparity map(output).
+	Yon should normalize it before showing it in a window for that its type is CV_16S.
+    If you just want to get the true disparity map for calculating the depth map,
+    you should divide it by DISP_SCALE(Its value is 16 in sgbm.cpp) 
+    and then get the absolute number,e.g.,abs(disparity/16).
+@mindis the minmal value of disparity(input).
+	It should be negative number. Because in this program, 
+    we assume that point(x,y) in the left image corresponds point(x-d,y) in the right image,
+    where x means the column, y means the row and d means the value of disparity.  
+@numdis The range of disparity(input).
 	You should insure numdis % 16 == 0.
-numthread:the number of threads(input).Default value is 1.
+@numthread the number of threads(input).Default value is 1.
 */
 #include<iostream>
 #include<opencv2/opencv.hpp>

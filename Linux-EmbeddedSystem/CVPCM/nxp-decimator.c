@@ -867,7 +867,7 @@ static int _init_entities(struct nxp_decimator *me)
 
     /* create link subdev to video node */
     ret = media_entity_create_link(entity, NXP_DECIMATOR_PAD_SOURCE_MEM,
-            &me->video->vdev.entity, 0, 0);
+            &me->video->vdev.entity, 0, MEDIA_LNK_FL_ENABLED);
     if (ret < 0) {
         pr_err("%s: failed to media_entity_create_link()\n", __func__);
         goto error_link;

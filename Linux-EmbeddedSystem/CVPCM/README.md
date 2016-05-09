@@ -3,8 +3,8 @@
 #### TODO:
 - [x] Figure out how video_register_device() work,
 - [x] To find the ov5640 device in `/dev/video*` to prove it.
-- [ ] Try to link ov5640 subdev to Clipper host.
-- [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
+- [x] Try to link ov5640 subdev to Clipper host.
+- [x] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
 - [ ] Read video stream from ov5640 dvp/mipi.
 
 * .config  

@@ -760,7 +760,7 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
     if (NULL != link)
         printk(KERN_ALERT "## media_entity_find_link success\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    printk(KERN_ALERT "## return %d from media_entity_setup_link", ret);
+    printk(KERN_ALERT "## return %d from media_entity_setup_link\n", ret);
 
     return sensor;
 }
@@ -824,6 +824,7 @@ struct nxp_capture *create_nxp_capture(int index,
         int module,
         struct nxp_capture_platformdata *pdata)
 {
+    struct media_link *link = NULL;
     struct nxp_capture *me;
     int ret;
 #ifdef CONFIG_NXP_CAPTURE_MIPI_CSI
@@ -920,11 +921,19 @@ struct nxp_capture *create_nxp_capture(int index,
 #ifdef CONFIG_NXP_CAPTURE_DECIMATOR
     ret = media_entity_create_link(
             &me->vin_clipper.subdev.entity, NXP_VIN_PAD_SOURCE_DECIMATOR,
-            &me->decimator.subdev.entity, NXP_DECIMATOR_PAD_SINK, MEDIA_LNK_FL_ENABLED);
+            &me->decimator.subdev.entity, NXP_DECIMATOR_PAD_SINK, 0);
     if (ret < 0) {
         pr_err("%s: failed to link vin source to decimator sink\n", __func__);
         goto error_link;
     }
+    
+    link = media_entity_find_link(\
+            &me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_DECIMATOR],\
+            &me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SINK]);
+    if (NULL != link)
+        printk(KERN_ALERT "## media_entity_find_link success\n");
+    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
+    printk(KERN_ALERT "## return %d from media_entity_setup_link in capture.c\n", ret);
 #endif
 
     /*

@@ -766,14 +766,12 @@ static int camera_common_set_clock(ulong clk_rate)
 static bool is_camera_port_configured = false;
 static void camera_common_vin_setup_io(int module, bool force)
 {
-    printk(KERN_ALERT "#####camera port config");
     if (!force && is_camera_port_configured)
         return;
     else {
         u_int *pad;
         int i, len;
         u_int io, fn;
-
 
         /* VIP0:0 = VCLK, VID0 ~ 7 */
         const u_int port[][2] = {
@@ -803,7 +801,7 @@ static void camera_common_vin_setup_io(int module, bool force)
 
         };
 
-        printk("%s\n", __func__);
+        printk("## camera port config in device.c: %s\n", __func__);
 
         pad = (u_int *)port;
         len = sizeof(port)/sizeof(port[0]);
@@ -821,59 +819,11 @@ static void camera_common_vin_setup_io(int module, bool force)
 
 static bool camera_power_enabled = true;
 // fix for dronel
-#if 0
-static void camera_power_control(int enable)
-{
-    struct regulator *cam_io_28V = NULL;
-    struct regulator *cam_core_18V = NULL;
-    struct regulator *cam_io_33V = NULL;
-
-    if (enable && camera_power_enabled)
-        return;
-    if (!enable && !camera_power_enabled)
-        return;
-
-    cam_core_18V = regulator_get(NULL, "vcam1_1.8V");
-    if (IS_ERR(cam_core_18V)) {
-        printk(KERN_ERR "%s: failed to regulator_get() for vcam1_1.8V", __func__);
-        return;
-    }
-
-    cam_io_28V = regulator_get(NULL, "vcam_2.8V");
-    if (IS_ERR(cam_io_28V)) {
-        printk(KERN_ERR "%s: failed to regulator_get() for vcam_2.8V", __func__);
-        return;
-    }
-
-    cam_io_33V = regulator_get(NULL, "vcam_3.3V");
-    if (IS_ERR(cam_io_33V)) {
-        printk(KERN_ERR "%s: failed to regulator_get() for vcam_3.3V", __func__);
-        return;
-    }
-
-    printk("%s: %d\n", __func__, enable);
-    if (enable) {
-        regulator_enable(cam_core_18V);
-        regulator_enable(cam_io_28V);
-        regulator_enable(cam_io_33V);
-    } else {
-        regulator_disable(cam_io_33V);
-        regulator_disable(cam_io_28V);
-        regulator_disable(cam_core_18V);
-    }
-
-    regulator_put(cam_io_28V);
-    regulator_put(cam_core_18V);
-    regulator_put(cam_io_33V);
-
-    camera_power_enabled = enable ? true : false;
-}
-#else
 static void camera_power_control(int enable)
 {
     struct regulator *cam_core_28V = NULL;
-    printk(KERN_ALERT "######enter camera power control func");
-    
+    printk(KERN_ALERT "## enter camera power_control func in device.c\n");
+#if 0    
     if (enable && camera_power_enabled)
         return;
     if (!enable && !camera_power_enabled)
@@ -884,7 +834,7 @@ static void camera_power_control(int enable)
         printk(KERN_ERR "%s: failed to regulator_get() for vcam1_2.8V", __func__);
         return;
     }
-    printk("%s: %d\n", __func__, enable);
+    printk("# %s: %d\n", __func__, enable);
     if (enable) {
         regulator_enable(cam_core_28V);
     } else {
@@ -892,10 +842,9 @@ static void camera_power_control(int enable)
     }
 
     regulator_put(cam_core_28V);
-
+#endif
     camera_power_enabled = enable ? true : false;
 }
-#endif
 
 static bool is_mipi_camera_enabled = false;
 static bool is_mipi_camera_power_state_changed = false;
@@ -967,37 +916,39 @@ static bool mipi_camera_power_state_changed(void)
 // modified by yang and hoping
 static int dvp_camera_power_enable(bool on)
 {
-    unsigned int io = CFG_IO_CAMERA_FRONT_POWER_DOWN;
-    unsigned int reset_io = CFG_IO_CAMERA_RESET;
-    printk(KERN_ALERT "######enter camera power_enable func");
+    printk(KERN_ALERT "## enter dvp power_enable func in device.c\n");
     PM_DBGOUT("%s: is_dvp_camera_enabled %d, on %d\n", __func__, is_dvp_camera_enabled, on);
-    if (on) {
-        //back_camera_power_enable(0);
-        if (!is_dvp_camera_enabled) {
-            camera_power_control(1);
-            /* First RST signal to low */
-            nxp_soc_gpio_set_out_value(reset_io, 1);
-            nxp_soc_gpio_set_io_dir(reset_io, 1);
-            nxp_soc_gpio_set_io_func(reset_io, nxp_soc_gpio_get_altnum(io));
-            nxp_soc_gpio_set_out_value(reset_io, 0);
-            mdelay(1);
-            
-            // PWDN signal High to Low 
-            nxp_soc_gpio_set_out_value(io, 0);
-            nxp_soc_gpio_set_io_dir(io, 1);
-            nxp_soc_gpio_set_io_func(io, nxp_soc_gpio_get_altnum(io));
-            nxp_soc_gpio_set_out_value(io, 1);
-            camera_common_set_clock(24000000);
-            mdelay(10);
-            // mdelay(1); 
-            nxp_soc_gpio_set_out_value(io, 0);
-            // mdelay(10); 
-            mdelay(10);
-            // RST signal  to High 
-            nxp_soc_gpio_set_out_value(reset_io, 1);
-            // mdelay(100); 
-            mdelay(5);
+    
+    struct regulator *camera_power_1p5V = NULL;
+    struct regulator *camera_power_2p8V = NULL;
 
+    camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
+    camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
+    
+    gpio_request(CAMERA_PD0,"CAMERA_PD0");
+    gpio_request(CAMERA_RST,"CAMERA_RST");
+
+    if (on) {
+        if (!is_dvp_camera_enabled) {
+            
+            gpio_direction_output(CAMERA_PD0, 1);
+            mdelay(5);
+            
+            regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
+            regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);
+            // power up
+            regulator_enable(camera_power_2p8V);
+            mdelay(5);
+            regulator_enable(camera_power_1p5V);
+            // reset
+            mdelay(10);
+            gpio_direction_output(CAMERA_PD0, 0);
+            // set CLK
+            nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
+            mdelay(5);
+            gpio_direction_output(CAMERA_RST, 1);
+            mdelay(30);
+            
             is_dvp_camera_enabled = true;
             is_dvp_camera_power_state_changed = true;
         } else {
@@ -1005,17 +956,16 @@ static int dvp_camera_power_enable(bool on)
         }
     } else {
         if (is_dvp_camera_enabled) {
-            nxp_soc_gpio_set_out_value(io, 1);
             is_dvp_camera_enabled = false;
             is_dvp_camera_power_state_changed = true;
         } else {
-            nxp_soc_gpio_set_out_value(io, 1);
             is_dvp_camera_power_state_changed = false;
         }
-        //if (!(is_back_camera_enabled || is_front_camera_enabled)) {
-        //    camera_power_control(0);
-        //}
     }
+	gpio_free(CAMERA_PD0);
+    gpio_free(CAMERA_RST);
+    regulator_put(camera_power_2p8V);
+    regulator_put(camera_power_1p5V);
 
     return 0;
 }

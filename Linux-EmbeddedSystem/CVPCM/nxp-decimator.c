@@ -462,6 +462,7 @@ static int nxp_decimator_s_power(struct v4l2_subdev *sd, int on)
     struct v4l2_subdev *remote_source;
 
     vmsg("%s: %d\n", __func__, on);
+    printk("## %s: %d in decimator.c\n", __func__, on);
 
     me = v4l2_get_subdevdata(sd);
     if (!me) {
@@ -550,6 +551,7 @@ static int nxp_decimator_s_stream(struct v4l2_subdev *sd, int enable)
     void *hostdata_back;
 
     vmsg("%s: %d\n", __func__, enable);
+    printk("## %s: %d in decimator.c \n", __func__, enable);
 
 #ifdef CONFIG_ARCH_NXP4330_3200
     if (enable) {
@@ -822,6 +824,7 @@ static const struct media_entity_operations nxp_decimator_media_ops = {
  */
 static int _init_entities(struct nxp_decimator *me)
 {
+    struct media_link *link = NULL;
     struct v4l2_subdev *sd = &me->subdev;
     struct media_pad *pads = me->pads;
     struct media_entity *entity = &sd->entity;
@@ -867,11 +870,17 @@ static int _init_entities(struct nxp_decimator *me)
 
     /* create link subdev to video node */
     ret = media_entity_create_link(entity, NXP_DECIMATOR_PAD_SOURCE_MEM,
-            &me->video->vdev.entity, 0, MEDIA_LNK_FL_ENABLED);
+            &me->video->vdev.entity, 0, 0);
     if (ret < 0) {
         pr_err("%s: failed to media_entity_create_link()\n", __func__);
         goto error_link;
     }
+
+    link = media_entity_find_link(&(entity->pads[NXP_DECIMATOR_PAD_SOURCE_MEM]), me->video->vdev.entity.pads);
+    if (NULL != link)
+        printk(KERN_ALERT "## media_entity_find_link success\n");
+    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
+    printk(KERN_ALERT "## return %d from media_entity_setup_link in decimator.c\n", ret);
 
     return 0;
 

@@ -2141,7 +2141,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
     int ret = 0;
 
     printk("##%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
-    ov5640_video_probe(client);
+    //ov5640_video_probe(client);
     if (enable) {
         if (!priv->win || !priv->cfmt) {
             dev_err(&client->dev, "norm or win select error\n");
@@ -2411,11 +2411,10 @@ static int ov5640_video_probe(struct i2c_client *client)
     camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
     camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
 
-    if (regulator_get_voltage(camera_power_2p8V) != 2800000)
-    {
+    //if (regulator_get_voltage(camera_power_2p8V) != 2800000)
+    //{
         printk("##: OV5640 dvp set voltage");
         regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
-    
         regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);
         printk(KERN_ALERT "#####: camera_power_1.5V...");
         regulator_enable(camera_power_2p8V);
@@ -2430,7 +2429,7 @@ static int ov5640_video_probe(struct i2c_client *client)
         mdelay(5);
         gpio_direction_output(CAMERA_RST, 1);
         mdelay(30);
-    }
+    //}
 
 	gpio_free(CAMERA_PD0);
     gpio_free(CAMERA_RST);
@@ -2482,7 +2481,7 @@ static int ov5640_probe(struct i2c_client *client, const struct i2c_device_id *i
     sd = &priv->subdev;
     strcpy(sd->name, MODULE_NAME);
 
-    ov5640_video_probe(client);
+    //ov5640_video_probe(client);
 
     /* register subdev */
     v4l2_i2c_subdev_init(sd, client, &ov5640_subdev_ops);

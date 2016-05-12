@@ -824,7 +824,6 @@ static const struct media_entity_operations nxp_decimator_media_ops = {
  */
 static int _init_entities(struct nxp_decimator *me)
 {
-    struct media_link *link = NULL;
     struct v4l2_subdev *sd = &me->subdev;
     struct media_pad *pads = me->pads;
     struct media_entity *entity = &sd->entity;
@@ -875,13 +874,7 @@ static int _init_entities(struct nxp_decimator *me)
         pr_err("%s: failed to media_entity_create_link()\n", __func__);
         goto error_link;
     }
-
-    link = media_entity_find_link(&(entity->pads[NXP_DECIMATOR_PAD_SOURCE_MEM]), me->video->vdev.entity.pads);
-    if (NULL != link)
-        printk(KERN_ALERT "## media_entity_find_link success\n");
-    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    printk(KERN_ALERT "## return %d from media_entity_setup_link in decimator.c\n", ret);
-
+    
     return 0;
 
 error_link:

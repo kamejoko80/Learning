@@ -2105,11 +2105,11 @@ static int ov5640_set_exposure_param(struct v4l2_subdev *sd)
 static int ov5640_g_chip_ident(struct v4l2_subdev *sd, struct v4l2_dbg_chip_ident *id)
 {
     printk("## %s.............%d...........\n",__func__,__LINE__);
-
+    struct i2c_client *client = v4l2_get_subdevdata(sd);
     struct ov5640_priv *priv = to_priv(sd);
-    id->ident    = priv->model;
-    id->revision = 0;
-    return 0;
+    //id->ident    = priv->model;
+    //id->revision = 0;
+    return v4l2_chip_ident_i2c_client(client, id, priv->model, 0);
 }
 
 static int ov5640_s_power(struct v4l2_subdev *sd, int on)
@@ -2337,7 +2337,7 @@ static const struct v4l2_subdev_video_ops ov5640_subdev_video_ops = {
     .s_mbus_fmt             = ov5640_s_mbus_fmt,
     //.s_crop     = ov5642_s_crop,
     //.g_crop     = ov5642_g_crop,
-    //.cropcap    = ov5640_cropcap,
+    .cropcap    = ov5640_cropcap,
 };
 
 /**

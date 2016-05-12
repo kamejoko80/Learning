@@ -449,7 +449,7 @@ static int _configure(struct nxp_vin_clipper *me, int enable)
     ret = down_interruptible(&me->s_stream_sem);
 
     vmsg("%s: enable %d\n", __func__, enable);
-    printk("%s: enable %d\n", __func__, enable);
+    //printk("%s: enable %d\n", __func__, enable);
     if (enable) {
         if (me->platdata->late_power_down)
             cancel_delayed_work_sync(&me->work_power_down);
@@ -493,7 +493,7 @@ static int _configure(struct nxp_vin_clipper *me, int enable)
             NXP_ATOMIC_CLEAR_MASK(NXP_VIN_STATE_STOPPING, &me->state);
     }
     vmsg("%s exit\n", __func__);
-    printk(KERN_ALERT "%s exit in clipper.c\n", __func__);
+    //printk(KERN_ALERT "%s exit in clipper.c\n", __func__);
 
     up(&me->s_stream_sem);
 
@@ -720,7 +720,6 @@ static void _disable_all(struct nxp_vin_clipper *me)
         NXP_ATOMIC_CLEAR_MASK(NXP_VIN_STATE_RUNNING_DECIMATOR, &me->state);
     }
 
-    printk(KERN_ALERT "call _configure in %s\n", __func__);
     _configure(me, 0);
 }
 
@@ -1004,8 +1003,31 @@ static int nxp_vin_clipper_s_power(struct v4l2_subdev *sd, int on)
     return ret;
 }
 
+static int nxp_vin_clipper_s_ctrl(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+{
+    struct nxp_vin_clipper *me;
+    struct v4l2_subdev *remote_source;
+    int ret = 0;
+    
+    me = v4l2_get_subdevdata(sd);
+	if (!me) {
+        pr_err("%s error: me is NULL\n", __func__);
+        return -EINVAL;
+	}
+
+    remote_source = _get_remote_source_subdev(me);
+    if (!remote_source) {
+        pr_err("%s error: remote is NULL\n", __func__);
+        return -EINVAL;
+    }
+
+    ret = v4l2_subdev_call(remote_source, core, s_ctrl, ctrl);
+    return ret;
+}
+
 static const struct v4l2_subdev_core_ops nxp_vin_clipper_core_ops = {
     .s_power = nxp_vin_clipper_s_power,
+    .s_ctrl = nxp_vin_clipper_s_ctrl,
 };
 
 /**
@@ -1047,7 +1069,6 @@ static int nxp_vin_clipper_s_stream(struct v4l2_subdev *sd, int enable)
             }
         }
         
-        printk(KERN_ALERT "call _configure in %s\n", __func__);
         _configure(me, enable);
         if (is_host_video) {
             ret = _register_irq_handler(me);
@@ -1135,7 +1156,6 @@ static int nxp_vin_clipper_s_stream(struct v4l2_subdev *sd, int enable)
         }
 
         if (!(NXP_ATOMIC_READ(&me->state) & (NXP_VIN_STATE_RUNNING_CLIPPER | NXP_VIN_STATE_RUNNING_DECIMATOR))) {
-            printk(KERN_ALERT "call _configure in %s\n", __func__);
             _configure(me, 0);
         } else if (NXP_ATOMIC_READ(&me->state) & NXP_VIN_STATE_RUNNING_DECIMATOR) {
             NXP_ATOMIC_CLEAR_MASK(NXP_VIN_STATE_STOPPING, &me->state);
@@ -1343,6 +1363,7 @@ static int nxp_vin_clipper_link_setup(struct media_entity *entity,
 
         vmsg("%s: connect clipper to sensor\n", __func__);
         _handle_input_connection(me, true);
+        printk("## connected clipper to sensor\n");
         break;
 
     case NXP_VIN_PAD_SOURCE_MEM | MEDIA_ENT_T_DEVNODE:
@@ -1377,6 +1398,7 @@ static int nxp_vin_clipper_link_setup(struct media_entity *entity,
 
         _handle_video_connection(me, true);
         me->link_count++;
+        printk("## connected video to clipper\n");
         break;
 
     case NXP_VIN_PAD_SOURCE_DECIMATOR | MEDIA_ENT_T_V4L2_SUBDEV:
@@ -1411,6 +1433,7 @@ static int nxp_vin_clipper_link_setup(struct media_entity *entity,
 
         _handle_decimator_connection(me, true);
         me->link_count++;
+        printk("## connected decimator to clipper.\n");
         break;
 
     case NXP_VIN_PAD_SOURCE_MEM | MEDIA_ENT_T_V4L2_SUBDEV:
@@ -1435,7 +1458,6 @@ static const struct media_entity_operations nxp_vin_clipper_media_ops = {
  */
 static int _init_entities(struct nxp_vin_clipper *me)
 {
-    struct media_link *link = NULL;
     struct v4l2_subdev *sd = &me->subdev;
     struct media_pad *pads = me->pads;
     struct media_entity *entity = &sd->entity;
@@ -1497,13 +1519,7 @@ static int _init_entities(struct nxp_vin_clipper *me)
         //pr_err("%s: failed to media_entity_create_link()\n", __func__);
         goto error_link;
     }
-
-    link = media_entity_find_link(&(entity->pads[NXP_VIN_PAD_SOURCE_MEM]), me->video->vdev.entity.pads);
-    if (NULL != link)
-        printk(KERN_ALERT "## media_entity_find_link success\n");
-    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    printk(KERN_ALERT "## return %d from media_entity_setup_link in clipper.c\n", ret);
-
+    
     return 0;
 
 error_link:
@@ -1641,7 +1657,6 @@ int nxp_vin_clipper_resume(struct nxp_vin_clipper *me)
 
     if (NXP_ATOMIC_READ(&me->state) & (NXP_VIN_STATE_RUNNING_DECIMATOR | NXP_VIN_STATE_RUNNING_CLIPPER)) {
         PM_DBGOUT("%s: reconfigure\n", __func__);
-        printk(KERN_ALERT "call _configure in %s\n", __func__);
         _configure(me, 1);
         if (NXP_ATOMIC_READ(&me->state) & NXP_VIN_STATE_RUNNING_CLIPPER) {
             PM_DBGOUT("%s: reset clipper address\n", __func__);

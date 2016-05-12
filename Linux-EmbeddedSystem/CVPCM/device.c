@@ -817,7 +817,7 @@ static void camera_common_vin_setup_io(int module, bool force)
     }
 }
 
-static bool camera_power_enabled = true;
+static bool camera_power_enabled = false;
 // fix for dronel
 static void camera_power_control(int enable)
 {

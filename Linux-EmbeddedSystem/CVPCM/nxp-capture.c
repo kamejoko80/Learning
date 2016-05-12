@@ -755,13 +755,13 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
 	}
 
     sensor_index++;
-
+    
     link = media_entity_find_link(sensor->entity.pads, &input->pads[NXP_VIN_PAD_SINK]);
     if (NULL != link)
         printk(KERN_ALERT "## media_entity_find_link success\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
     printk(KERN_ALERT "## return %d from media_entity_setup_link\n", ret);
-
+    
     return sensor;
 }
 
@@ -824,7 +824,6 @@ struct nxp_capture *create_nxp_capture(int index,
         int module,
         struct nxp_capture_platformdata *pdata)
 {
-    struct media_link *link = NULL;
     struct nxp_capture *me;
     int ret;
 #ifdef CONFIG_NXP_CAPTURE_MIPI_CSI
@@ -927,13 +926,7 @@ struct nxp_capture *create_nxp_capture(int index,
         goto error_link;
     }
     
-    link = media_entity_find_link(\
-            &me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_DECIMATOR],\
-            &me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SINK]);
-    if (NULL != link)
-        printk(KERN_ALERT "## media_entity_find_link success\n");
-    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    printk(KERN_ALERT "## return %d from media_entity_setup_link in capture.c\n", ret);
+
 #endif
 
     /*
@@ -982,6 +975,7 @@ void release_nxp_capture(struct nxp_capture *me)
 
 int register_nxp_capture(struct nxp_capture *me)
 {
+    struct media_link *link = NULL;
     int ret;
     struct nxp_v4l2_i2c_board_info *sensor_info;
     struct v4l2_subdev *sensor;
@@ -1034,6 +1028,7 @@ int register_nxp_capture(struct nxp_capture *me)
     }
     
     me->sensor = sensor;
+
 #if 0 
     struct nxp_video *sensor_video;
     sensor_video = create_nxp_video("OV5640_DVP", NXP_VIDEO_TYPE_CAPTURE,
@@ -1046,9 +1041,38 @@ int register_nxp_capture(struct nxp_capture *me)
     register_nxp_video(sensor_video);
 #endif
     
+    link = media_entity_find_link(
+            &me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_DECIMATOR],
+            &me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SINK]);
+    if (NULL == link)
+        printk(KERN_ALERT "## fail to find link from clipper to decimator.\n");
+    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
+    if (ret != 0)
+        printk(KERN_ALERT "## fail to setup link from clipper to decimator.\n");
     
+#if 1 
+    link = media_entity_find_link(
+            &(me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_MEM]),
+            me->vin_clipper.video->pads);
+    if (NULL == link)
+        printk(KERN_ALERT "## fail to find link from clipper to video node.\n");
+    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
+    if (ret != 0)
+        printk(KERN_ALERT "## fail to setup link from clipper to video node.\n");
+#endif
     
-    
+#if 1 
+    link = media_entity_find_link(
+            &(me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SOURCE_MEM]),
+            me->decimator.video->pads);
+    if (NULL == link)
+        printk(KERN_ALERT "## fail to find link from decimator to video node.\n");
+    ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
+    if (ret != 0)
+        printk(KERN_ALERT "## fail to setup link from decimator to video node.\n");
+#endif
+
+
     // psw0523 fix for urbetter
     /* ret = request_irq(me->irq, &_irq_handler, IRQF_DISABLED, "nxp-capture", me); */
     ret = request_irq(me->irq, &_irq_handler, IRQF_SHARED, "nxp-capture", me);

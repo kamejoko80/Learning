@@ -1003,7 +1003,7 @@ static int nxp_vin_clipper_s_power(struct v4l2_subdev *sd, int on)
     return ret;
 }
 
-static int nxp_vin_clipper_s_ctrl(struct v4l2_subdev *sd, struct v4l2_ctrl *ctrl)
+static int nxp_vin_clipper_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 {
     struct nxp_vin_clipper *me;
     struct v4l2_subdev *remote_source;

@@ -709,6 +709,10 @@ static struct v4l2_m2m_ops nxp_m2m_ops = {
  * v4l2_ioctl_ops
  */
 /* querycap: check capture, out, m2m */
+
+#define V4L2_CAP_EXT_PIX_FORMAT 0x00200000  
+//The device supports the struct v4l2_pix_format extended fields.
+
 static int nxp_video_querycap(struct file *file, void *fh,
         struct v4l2_capability *cap)
 {
@@ -724,8 +728,7 @@ static int nxp_video_querycap(struct file *file, void *fh,
     switch(me->type) {
     case NXP_VIDEO_TYPE_CAPTURE:
         cap->capabilities = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_STREAMING |
-                V4L2_CAP_DEVICE_CAPS;
-        cap->device_caps = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_STREAMING;
+                V4L2_CAP_DEVICE_CAPS | V4L2_CAP_EXT_PIX_FORMAT;
         break;
     case NXP_VIDEO_TYPE_OUT:
         cap->capabilities = V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_STREAMING;
@@ -1216,7 +1219,7 @@ static struct v4l2_ioctl_ops nxp_video_ioctl_ops = {
     .vidioc_cropcap                 = nxp_video_cropcap,
     .vidioc_g_crop                  = nxp_video_get_crop,
     .vidioc_s_crop                  = nxp_video_set_crop,
-    //.vidioc_s_ctrl                  = nxp_video_s_ctrl,
+    .vidioc_s_ctrl                  = nxp_video_s_ctrl,
     .vidioc_g_chip_ident            = nxp_video_g_chip_ident,
 };
 
@@ -1240,6 +1243,7 @@ static int nxp_video_open(struct file *file)
                 me->type == NXP_VIDEO_TYPE_OUT ?
                 V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE : V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
                 &pad);
+    
 
         if (sd)
             ret = v4l2_subdev_call(sd, core, s_power, 1);
@@ -1248,6 +1252,7 @@ static int nxp_video_open(struct file *file)
             me->m2m_ctx = v4l2_m2m_ctx_init(me->m2m_dev, me, m2m_queue_init);
             if (IS_ERR(me->m2m_ctx)) {
                 pr_err("%s: failed to v4l2_m2m_ctx_init()\n", __func__);
+                printk("### %s: failed to v4l2_m2m_ctx_init()\n", __func__);
                 return -EINVAL;
             }
         }
@@ -1422,6 +1427,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     int ret;
     struct vb2_queue *vbq = NULL;
     struct nxp_video *me = kzalloc(sizeof(struct nxp_video), GFP_KERNEL);
+    
     int pad_num = 0;
 
     if (!me) {
@@ -1436,48 +1442,9 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     me->v4l2_dev      = v4l2_dev;
     me->vb2_alloc_ctx = vb2_alloc_ctx;
 
-    /* pad init */
-    /* TODO */
-#if 0
-    switch (type) {
-    case NXP_VIDEO_TYPE_CAPTURE:
-        /**
-         * capture subdev -> capture ->
-         * m2m subdev or out subdev
-         */
-        me->pads[0].flags = MEDIA_PAD_FL_SINK;
-        me->pads[1].flags = MEDIA_PAD_FL_SOURCE;
-        pad_num = 2;
-        break;
-
-    case NXP_VIDEO_TYPE_OUT:
-        /**
-         * out -> out subdev
-         */
-        me->pads[0].flags = MEDIA_PAD_FL_SOURCE;
-        pad_num = 1;
-        break;
-
-    case NXP_VIDEO_TYPE_M2M:
-        /**
-         * capture video -> m2m subdev ->
-         * m2m video -> out subdev
-         */
-        me->pads[0].flags = MEDIA_PAD_FL_SINK;
-        me->pads[1].flags = MEDIA_PAD_FL_SOURCE;
-        pad_num = 2;
-        break;
-
-    default:
-        pr_err("%s: invalid type(%d)\n", __func__, type);
-        kfree(me);
-        return NULL;
-    }
-#else
     me->pads[0].flags = MEDIA_PAD_FL_SINK;
     me->pads[1].flags = MEDIA_PAD_FL_SOURCE;
     pad_num = 2;
-#endif
 
     me->vdev.entity.ops = &nxp_media_entity_operations;
     ret = media_entity_init(&me->vdev.entity, pad_num, me->pads, 0);
@@ -1487,6 +1454,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     }
 
     mutex_init(&me->lock);
+    
 
     me->register_buffer_consumer = _register_buffer_consumer;
     me->unregister_buffer_consumer = _unregister_buffer_consumer;

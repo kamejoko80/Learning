@@ -996,18 +996,11 @@ int register_nxp_capture(struct nxp_capture *me)
 #endif
 
 #ifdef CONFIG_NXP_CAPTURE_CLIPPER
-#if 1  // add by hoping
     ret = nxp_vin_clipper_register(&me->vin_clipper);
     if (ret < 0) {
         pr_err("%s: failed to nxp_vin_clipper_register()\n", __func__);
         goto error_vin;
     }
-#else
-    ret = nxp_vin_clipper_register(me->get_v4l2_device(me), &me->vin_clipper.subdev);
-    printk(KERN_ALERT "## clipper register %d\n", ret);
-    ret = register_nxp_video(me->vin_clipper.video);
-    printk(KERN_ALERT "## clipper video %d\n", ret);
-#endif
 #endif
 
 #ifdef CONFIG_NXP_CAPTURE_DECIMATOR
@@ -1028,18 +1021,6 @@ int register_nxp_capture(struct nxp_capture *me)
     }
     
     me->sensor = sensor;
-
-#if 0 
-    struct nxp_video *sensor_video;
-    sensor_video = create_nxp_video("OV5640_DVP", NXP_VIDEO_TYPE_CAPTURE,
-            me->get_v4l2_device(me), me->get_alloc_ctx(me));
-
-    ret = media_entity_create_link(&sensor->entity, 0, &sensor_video->vdev.entity, 0, MEDIA_LNK_FL_ENABLED);
-    if (ret < 0) {
-        printk(KERN_ALERT "#### failed to media_entity_create_link()");
-    }
-    register_nxp_video(sensor_video);
-#endif
     
     link = media_entity_find_link(
             &me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_DECIMATOR],
@@ -1050,7 +1031,6 @@ int register_nxp_capture(struct nxp_capture *me)
     if (ret != 0)
         printk(KERN_ALERT "## fail to setup link from clipper to decimator.\n");
     
-#if 1 
     link = media_entity_find_link(
             &(me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_MEM]),
             me->vin_clipper.video->pads);
@@ -1059,9 +1039,7 @@ int register_nxp_capture(struct nxp_capture *me)
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
     if (ret != 0)
         printk(KERN_ALERT "## fail to setup link from clipper to video node.\n");
-#endif
     
-#if 1 
     link = media_entity_find_link(
             &(me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SOURCE_MEM]),
             me->decimator.video->pads);
@@ -1070,7 +1048,13 @@ int register_nxp_capture(struct nxp_capture *me)
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
     if (ret != 0)
         printk(KERN_ALERT "## fail to setup link from decimator to video node.\n");
-#endif
+
+    struct video_device vdev;
+    vdev = me->get_v4l2_device(me);
+    // There are 11 control ops in OV5640
+    v4l2_ctrl_handler_init(&vdev->ctrl_handler, 11);
+	v4l2_ctrl_add_handler(&vdev->ctrl_handler, sensor->ctrl_handler);
+
 
 
     // psw0523 fix for urbetter

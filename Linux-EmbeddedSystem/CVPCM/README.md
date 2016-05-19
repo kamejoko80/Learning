@@ -1,12 +1,35 @@
 # Computer Vision Passenger Control Module
 
-#### TODO:
-- [x] Figure out how video_register_device() work,
+### TODO
+- [x] Figure out how `video_register_device()` work,
 - [x] To find the ov5640 device in `/dev/video*` to prove it.
 - [x] Try to link ov5640 subdev to Clipper host.
-- [x] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
+- [ ] Try to fix nxp-video.c
+- [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
 - [ ] Read video stream from ov5640 dvp/mipi.
 
+### Framework
+When Linux kernel booting, `nxp_v4l2_driver` defined in nxp-v4l2.c
+as a `module_platform_driver` will be installed first. 
+The installation will run the function `nxp_v4l2_probe()`. 
+In `nxp_v4l2_probe()`, `v4l2_device_register()` and `media_device_register()`
+is to run to register `v4l2_device` and `media_device` respectively 
+(read more about these two functions in `v4l2-framework.txt` and `media-framework.txt`)
+, then `create_nxp_capture()` and `register_nxp_capture()` 
+to create and register nxp capture device respectively, finally, 
+`v4l2_device_register_subdev_nodes()` to register device nodes for all subdevices, 
+which is introduced in `v4l2-framework.txt`, too. 
+So far, operations in kernel booting time is done.
+
+Two functions `create_nxp_capture()` and `register_nxp_capture()` defined in 
+nxp-capture.c, however, are more worth of interest for us.
+`create_nxp_capture()` contains initialization for three 'children' 
+of capture device: clipper, decimator and csi.
+
+
+
+
+### File list
 * .config  
 make config file  
 in `/linux/kernel/`
@@ -43,4 +66,13 @@ cp from `/linux/kernel/arch/arm/mach-s5p6818/include/mach/`
 
 * nxp-v4l2.c  
 cp from `/linux/kernel/drivers/media/video/nexell/`
+
+* v4l2-framework.txt  
+> device instances  
+>  |  
+>  +-sub-device instances  
+>  |  
+>  \-V4L2 device nodes  
+>      |  
+>      \-filehandle instances  
 

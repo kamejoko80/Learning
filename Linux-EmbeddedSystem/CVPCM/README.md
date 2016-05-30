@@ -23,9 +23,14 @@ So far, operations in kernel booting time is done.
 
 Two functions `create_nxp_capture()` and `register_nxp_capture()` defined in 
 nxp-capture.c, however, are more worth of interest for us.
-`create_nxp_capture()` contains initialization for three 'children' 
-of capture device: clipper, decimator and csi.
 
+`create_nxp_capture()` instantialize the structure `nxp_capture`,
+and initialize its three 'children'(subdevice) of capture device ---
+clipper, decimator and csi --- by `nxp_vin_clipper_init()`, `nxp_decimator_init()` 
+and `nxp_csi_init()` respectively. Finaly, it links the csi(source) to clipper(sink),  
+clipper(source) to decimator(sink). 
+
+`register_nxp_capture()` 
 
 
 

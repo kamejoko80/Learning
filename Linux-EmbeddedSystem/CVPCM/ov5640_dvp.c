@@ -2481,7 +2481,7 @@ static int ov5640_probe(struct i2c_client *client, const struct i2c_device_id *i
     sd = &priv->subdev;
     strcpy(sd->name, MODULE_NAME);
 
-    //ov5640_video_probe(client);
+    ov5640_video_probe(client);
 
     /* register subdev */
     v4l2_i2c_subdev_init(sd, client, &ov5640_subdev_ops);

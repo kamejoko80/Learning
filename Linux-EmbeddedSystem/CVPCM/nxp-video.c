@@ -343,7 +343,7 @@ _fill_nxp_video_buffer(struct nxp_video_buffer *buf, struct vb2_buffer *vb)
     struct nxp_video_frame *frame;
     bool is_separated;
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE)
         frame = &me->frame[0];
     else
         frame = &me->frame[1];
@@ -398,7 +398,7 @@ static int buffer_done(struct nxp_video_buffer *buf)
     u32 ci = buf->consumer_index;
     u32 type = vb->vb2_queue->type;
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         consumer_count = me->sink_consumer_count;
         cl = &me->sink_consumer_list;
     } else {
@@ -439,8 +439,9 @@ static int nxp_vb2_queue_setup(struct vb2_queue *q, const struct v4l2_format *fm
     struct nxp_video_frame *frame = NULL;
 
     pr_debug("%s\n", __func__);
+    printk("%s\n", __func__);
 
-    if (q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE)
+    if (q->type == V4L2_BUF_TYPE_VIDEO_CAPTURE)
         frame = &me->frame[0];
     else
         frame = &me->frame[1];
@@ -488,7 +489,7 @@ static int nxp_vb2_buf_init(struct vb2_buffer *vb)
 
     pr_debug("%s: type(0x%x)\n", __func__, type);
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         bufs = me->sink_bufs;
     } else if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
         bufs = me->source_bufs;
@@ -521,7 +522,7 @@ static void nxp_vb2_buf_cleanup(struct vb2_buffer *vb)
 
     pr_debug("%s\n", __func__);
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         bufs = me->sink_bufs;
     } else if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
         bufs = me->source_bufs;
@@ -571,7 +572,7 @@ static void nxp_vb2_buf_queue(struct vb2_buffer *vb)
     u32 type = vb->vb2_queue->type;
     int ret;
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         buf = me->sink_bufs[vb->v4l2_buf.index];
         c = _find_consumer(me, &me->sink_consumer_list, 0);
     } else if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
@@ -643,7 +644,7 @@ static int m2m_queue_init(void *priv, struct vb2_queue *src_vq,
 
     memset(dst_vq, 0, sizeof(*dst_vq));
     dst_vq->name = kasprintf(GFP_KERNEL, "%s-dst", me->name);
-    dst_vq->type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
+    dst_vq->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     dst_vq->io_modes = VB2_MMAP | VB2_USERPTR | VB2_DMABUF;
     dst_vq->drv_priv = me;
     dst_vq->ops = &nxp_vb2_ops;
@@ -728,7 +729,7 @@ static int nxp_video_querycap(struct file *file, void *fh,
     switch(me->type) {
     case NXP_VIDEO_TYPE_CAPTURE:
         cap->capabilities = V4L2_CAP_VIDEO_CAPTURE_MPLANE | V4L2_CAP_STREAMING |
-                V4L2_CAP_DEVICE_CAPS | V4L2_CAP_EXT_PIX_FORMAT;
+                V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_READWRITE;
         break;
     case NXP_VIDEO_TYPE_OUT:
         cap->capabilities = V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_STREAMING;
@@ -746,7 +747,6 @@ static int nxp_video_querycap(struct file *file, void *fh,
 }
 
 
-#if 0
 static int nxp_video_enum_format(struct file *file, void *fh,
         struct v4l2_fmtdesc *f)
 {
@@ -759,6 +759,7 @@ static int nxp_video_get_format(struct file *file, void *fh,
         struct v4l2_format *f)
 {
     /* TODO */
+#if 0
     struct nxp_video *me = file->private_data;
     struct nxp_video_frame *frame;
     struct v4l2_subdev *subdev;
@@ -788,7 +789,6 @@ static int nxp_video_get_format(struct file *file, void *fh,
     }
     
     f = &frame->format; 
-#if 0
     ret = v4l2_subdev_call(subdev, pad, get_fmt, fh, f);
     if (ret < 0) {
         printk("%s: failed to subdev set_fmt()\n", __func__);
@@ -798,7 +798,6 @@ static int nxp_video_get_format(struct file *file, void *fh,
     printk("%s\n", __func__);
     return 0;
 }
-#endif
 
 static int nxp_video_set_format(struct file *file, void *fh,
         struct v4l2_format *f)
@@ -814,15 +813,17 @@ static int nxp_video_set_format(struct file *file, void *fh,
     int i;
 
     if (me->vbq && (f->type != me->vbq->type)) {
+        printk("%s: type is different(%d/%d)\n", __func__, f->type, me->vbq->type);
         pr_err("%s: type is different(%d/%d)\n", __func__, f->type, me->vbq->type);
         return -EINVAL;
     }
 
-    if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         frame = &me->frame[0];
     } else if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
         frame = &me->frame[1];
     } else {
+        printk("%s: invalid type(0x%x)\n", __func__, f->type);
         pr_err("%s: invalid type(0x%x)\n", __func__, f->type);
         return -EINVAL;
     }
@@ -831,6 +832,7 @@ static int nxp_video_set_format(struct file *file, void *fh,
     format = _find_format(pix->pixelformat, 0);
     if (!format) {
         pr_err("%s: unsupported format!!!\n", __func__);
+        printk("%s: unsupported format!!!\n", __func__);
         return -EINVAL;
     }
 
@@ -838,6 +840,7 @@ static int nxp_video_set_format(struct file *file, void *fh,
 
     subdev = _get_remote_subdev(me, f->type, &pad);
     if (!subdev) {
+        printk("%s: can't get remote source subdev\n", __func__);
         pr_err("%s: can't get remote source subdev\n", __func__);
         return -EINVAL;
     }
@@ -854,6 +857,7 @@ static int nxp_video_set_format(struct file *file, void *fh,
     /* call to subdev */
     ret = v4l2_subdev_call(subdev, pad, set_fmt, NULL, &mbus_fmt);
     if (ret < 0) {
+        printk("%s: failed to subdev set_fmt()\n", __func__);
         pr_err("%s: failed to subdev set_fmt()\n", __func__);
         return ret;
     }
@@ -873,10 +877,10 @@ static int nxp_video_set_format(struct file *file, void *fh,
     }
 
     pr_debug("%s: %s success!!!\n", __func__, me->name);
+    printk("%s: %s success!!!\n", __func__, me->name);
     return 0;
 }
 
-#if 0
 static int nxp_video_try_format(struct file *file, void *fh,
         struct v4l2_format *f)
 {
@@ -884,7 +888,6 @@ static int nxp_video_try_format(struct file *file, void *fh,
     pr_debug("%s\n", __func__);
     return 0;
 }
-#endif
 
 static int nxp_video_reqbufs(struct file *file, void *fh,
         struct v4l2_requestbuffers *b)
@@ -1161,7 +1164,7 @@ static int nxp_video_s_ctrl(struct file *file, void *fh,
 
     me = file->private_data;
     type = (me->type == NXP_VIDEO_TYPE_CAPTURE) ?
-        V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+        V4L2_BUF_TYPE_VIDEO_CAPTURE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     subdev = _get_remote_subdev(me, type, &pad);
 
     ret = v4l2_subdev_call(subdev, core, s_ctrl, ctrl);
@@ -1184,7 +1187,7 @@ static int nxp_video_g_chip_ident(struct file *file, void *fh,
 
     me = file->private_data;
     type = (me->type == NXP_VIDEO_TYPE_CAPTURE) ?
-        V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+        V4L2_BUF_TYPE_VIDEO_CAPTURE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
     
     subdev = _get_remote_subdev(me, type, &pad);
 
@@ -1197,25 +1200,27 @@ static int nxp_video_g_chip_ident(struct file *file, void *fh,
 
 static struct v4l2_ioctl_ops nxp_video_ioctl_ops = {
     .vidioc_querycap                = nxp_video_querycap,
-    //.vidioc_enum_fmt_vid_cap_mplane = nxp_video_enum_format,
-    //.vidioc_enum_fmt_vid_out_mplane = nxp_video_enum_format,
-    //.vidioc_g_fmt_vid_cap_mplane    = nxp_video_get_format,
-    //.vidioc_g_fmt_vid_out_mplane    = nxp_video_get_format,
+    .vidioc_enum_fmt_vid_cap_mplane = nxp_video_enum_format,
+    .vidioc_enum_fmt_vid_out_mplane = nxp_video_enum_format,
+    .vidioc_g_fmt_vid_cap           = nxp_video_get_format,
+    .vidioc_s_fmt_vid_cap           = nxp_video_set_format,
+    .vidioc_g_fmt_vid_cap_mplane    = nxp_video_get_format,
+    .vidioc_g_fmt_vid_out_mplane    = nxp_video_get_format,
     .vidioc_s_fmt_vid_cap_mplane    = nxp_video_set_format,
     .vidioc_s_fmt_vid_out_mplane    = nxp_video_set_format,
-    //.vidioc_try_fmt_vid_cap_mplane  = nxp_video_try_format,
+    .vidioc_try_fmt_vid_cap_mplane  = nxp_video_try_format,
     .vidioc_reqbufs                 = nxp_video_reqbufs,
     .vidioc_querybuf                = nxp_video_querybuf,
     .vidioc_qbuf                    = nxp_video_qbuf,
     .vidioc_dqbuf                   = nxp_video_dqbuf,
     .vidioc_streamon                = nxp_video_streamon,
     .vidioc_streamoff               = nxp_video_streamoff,
-    //.vidioc_enum_input              = nxp_video_enum_input,
-    //.vidioc_g_input                 = nxp_video_get_input,
-    //.vidioc_s_input                 = nxp_video_set_input,
-    //.vidioc_enum_output             = nxp_video_enum_output,
-    //.vidioc_g_output                = nxp_video_get_output,
-    //.vidioc_s_output                = nxp_video_set_output,
+    .vidioc_enum_input              = nxp_video_enum_input,
+    .vidioc_g_input                 = nxp_video_get_input,
+    .vidioc_s_input                 = nxp_video_set_input,
+    .vidioc_enum_output             = nxp_video_enum_output,
+    .vidioc_g_output                = nxp_video_get_output,
+    .vidioc_s_output                = nxp_video_set_output,
     .vidioc_cropcap                 = nxp_video_cropcap,
     .vidioc_g_crop                  = nxp_video_get_crop,
     .vidioc_s_crop                  = nxp_video_set_crop,
@@ -1241,7 +1246,7 @@ static int nxp_video_open(struct file *file)
 
         sd = _get_remote_subdev(me,
                 me->type == NXP_VIDEO_TYPE_OUT ?
-                V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE : V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+                V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE : V4L2_BUF_TYPE_VIDEO_CAPTURE,
                 &pad);
     
 
@@ -1256,6 +1261,14 @@ static int nxp_video_open(struct file *file)
                 return -EINVAL;
             }
         }
+
+        // set format
+
+        // init videobuf
+
+        // setup control handler
+        //v4l2_ctrl_handler_setup(&me->vdev->ctrl_handler);
+
     }
     me->open_count++;
     file->private_data = me;
@@ -1276,7 +1289,7 @@ static int nxp_video_release(struct file *file)
     if (me->open_count == 0) {
         sd = _get_remote_subdev(me,
                 me->type == NXP_VIDEO_TYPE_OUT ?
-                V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE : V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE,
+                V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE : V4L2_BUF_TYPE_VIDEO_CAPTURE,
                 &pad);
         if (sd) {
             ret = v4l2_subdev_call(sd, core, s_power, 0);
@@ -1475,7 +1488,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
             goto error_vbq_alloc;
         }
         vbq->type     = type == NXP_VIDEO_TYPE_CAPTURE ?
-            V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
+            V4L2_BUF_TYPE_VIDEO_CAPTURE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
         vbq->io_modes = VB2_MMAP | VB2_USERPTR | VB2_DMABUF;
         vbq->drv_priv = me;
         vbq->ops      = &nxp_vb2_ops;

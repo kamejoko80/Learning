@@ -801,12 +801,14 @@ static int create_sensor_sysfs(int module)
     if (!sysfs_created) {
         struct kobject *kobj = kobject_create_and_add("camera sensor", &platform_bus.kobj);
         if (!kobj) {
+            printk("%s: failed to kobject_create_and_add for camera sensor\n", __func__);
             pr_err("%s: failed to kobject_create_and_add for camera sensor\n", __func__);
             return -EINVAL;
         }
 
         ret = sysfs_create_group(kobj, &attr_group);
         if (ret) {
+            printk("%s: failed to sysfs_create_group for camera sensor\n", __func__);
             pr_err("%s: failed to sysfs_create_group for camera sensor\n", __func__);
             kobject_del(kobj);
             return -EINVAL;
@@ -1048,13 +1050,13 @@ int register_nxp_capture(struct nxp_capture *me)
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
     if (ret != 0)
         printk(KERN_ALERT "## fail to setup link from decimator to video node.\n");
-
-    struct video_device vdev;
+#if 0
+    struct v4l2_device *vdev;
     vdev = me->get_v4l2_device(me);
     // There are 11 control ops in OV5640
     v4l2_ctrl_handler_init(&vdev->ctrl_handler, 11);
 	v4l2_ctrl_add_handler(&vdev->ctrl_handler, sensor->ctrl_handler);
-
+#endif
 
 
     // psw0523 fix for urbetter

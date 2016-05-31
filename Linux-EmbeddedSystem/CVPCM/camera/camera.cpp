@@ -19,11 +19,11 @@ int c_camera_type = 0;
 
 Camera::Camera(char *DEV_NAME, int w, int h, int camera_type)
 {
-    memcpy(dev_name,DEV_NAME,strlen(DEV_NAME));
-    io = IO_METHOD_MMAP;//IO_METHOD_READ;//IO_METHOD_MMAP;
-    cap_image_size=0;
-    width=w;
-    height=h;
+    memcpy(dev_name, DEV_NAME, strlen(DEV_NAME));
+    io = IO_METHOD_MMAP; //IO_METHOD_READ; //IO_METHOD_MMAP;
+    cap_image_size = 0;
+    width = w;
+    height = h;
 
 	if(1 == camera_type)
 	{
@@ -31,25 +31,30 @@ Camera::Camera(char *DEV_NAME, int w, int h, int camera_type)
 	}
 }
 
-Camera::~Camera(){
-
+Camera::~Camera()
+{
 }
 
-unsigned int Camera::getImageSize(){
+unsigned int Camera::getImageSize()
+{
     return cap_image_size;
 }
 
-void Camera::CloseDevice() {
+void Camera::CloseDevice()
+{
     stop_capturing();
     uninit_device();
     close_device();
 }
 
-void Camera::errno_exit(const char * s) {
+void Camera::errno_exit(const char * s)
+{
     fprintf(stderr, "%s error %d, %s\n", s, errno, strerror(errno));
     exit(EXIT_FAILURE);
 }
-int Camera::xioctl(int fd, int request, void * arg) {
+
+int Camera::xioctl(int fd, int request, void * arg)
+{
     int r;
     do
         r = ioctl(fd, request, arg);
@@ -57,36 +62,46 @@ int Camera::xioctl(int fd, int request, void * arg) {
     return r;
 }
 
-int Camera::read_frame(unsigned char *image) {
+int Camera::read_frame(unsigned char *image)
+{
     struct v4l2_buffer buf;
 
     CLEAR (buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
-    if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf)) {
-        switch (errno) {
-        case EAGAIN:
-		printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-            return 0;
-        case EIO:
-		printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-            /* Could ignore EIO, see spec. */
-            /* fall through */
-        default:
-		printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-            errno_exit("VIDIOC_DQBUF");
+    
+    if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf))
+    {
+        switch (errno)
+        {
+            case EAGAIN:
+		        printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+                return 0;
+            case EIO:
+		        printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+                /* Could ignore EIO, see spec. */
+                /* fall through */
+            default:
+		        printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+                errno_exit("VIDIOC_DQBUF");
         }
     }
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+	
+    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     assert(buf.index < n_buffers);
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+	
+    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+    
     memcpy(image,buffers[0].start,cap_image_size);
+    
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         errno_exit("VIDIOC_QBUF");
 
     return 1;
 }
-void Camera::stop_capturing(void) {
+
+void Camera::stop_capturing(void)
+{
     enum v4l2_buf_type type;
     switch (io) {
     case IO_METHOD_READ:
@@ -100,33 +115,42 @@ void Camera::stop_capturing(void) {
         break;
     }
 }
-bool Camera::start_capturing(void) {
+
+bool Camera::start_capturing(void)
+{
     unsigned int i;
     enum v4l2_buf_type type;
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-    for (i = 0; i < n_buffers; ++i) {
+	
+    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+    for (i = 0; i < n_buffers; ++i)
+    {
         struct v4l2_buffer buf;
         CLEAR (buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = i;
+        
         if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
-	{
-		printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+	    {
+		    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
             return false;
-	}
+	    }
     }
+    
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    
     if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
     {
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+	    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
         return false;
-     }
+    }
+
 	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     return true;
 }
 
-void Camera::uninit_device(void) {
+void Camera::uninit_device(void)
+{
     unsigned int i;
     switch (io) {
     case IO_METHOD_READ:
@@ -145,31 +169,44 @@ void Camera::uninit_device(void) {
     free(buffers);
 }
 
-bool Camera::init_mmap(void) {
+bool Camera::init_mmap(void)
+{
     struct v4l2_requestbuffers req;
     CLEAR (req);
     req.count = 4;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
-    if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req)) {
-        if (EINVAL == errno) {
+    
+    if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req))
+    {
+        if (EINVAL == errno)
+        {
             fprintf(stderr, "%s does not support "
                     "memory mapping\n", dev_name);
             return false;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
-    if (req.count < 2) {
+    
+    if (req.count < 2)
+    {
         fprintf(stderr, "Insufficient buffer memory on %s\n", dev_name);
         return false;
     }
+    
     buffers = (buffer*)calloc(req.count, sizeof(*buffers));
-    if (!buffers) {
+    
+    if (!buffers)
+    {
         fprintf(stderr, "Out of memory\n");
         return false;
     }
-    for (n_buffers = 0; n_buffers < req.count; ++n_buffers) {
+    
+    for (n_buffers = 0; n_buffers < req.count; ++n_buffers)
+    {
         struct v4l2_buffer buf;
         CLEAR (buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -184,10 +221,12 @@ bool Camera::init_mmap(void) {
         if (MAP_FAILED == buffers[n_buffers].start)
             return false;
     }
+
     return true;
 }
 
-bool Camera::init_device(void) {
+bool Camera::init_device(void)
+{
     struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
@@ -322,30 +361,35 @@ bool Camera::init_device(void) {
     printf("-#-#-#-#-#-#-#-#-#-#-#-#-#-\n");
     printf("\n");
 
-    //init_mmap();
+    init_mmap();
 
     return true;
 }
 
-void Camera::close_device(void) {
+void Camera::close_device(void)
+{
     if (-1 == close(fd))
         errno_exit("close");
     fd = -1;
 }
 
-bool Camera::open_device(void) {
+bool Camera::open_device(void)
+{
     struct stat st;
-    if (-1 == stat(dev_name, &st)) {
+    if (-1 == stat(dev_name, &st))
+    {
         fprintf(stderr, "Cannot identify '%s': %d, %s\n", dev_name, errno,
                 strerror(errno));
         return false;
     }
-    if (!S_ISCHR(st.st_mode)) {
+    if (!S_ISCHR(st.st_mode))
+    {
         fprintf(stderr, "%s is no device\n", dev_name);
         return false;
     }
     fd = open(dev_name, O_RDWR /* required */| O_NONBLOCK, 0);
-    if (-1 == fd) {
+    if (-1 == fd)
+    {
         fprintf(stderr, "Cannot open '%s': %d, %s\n", dev_name, errno,
                 strerror(errno));
         return false;
@@ -378,7 +422,8 @@ bool Camera::OpenDevice()
     }
 }
 
-bool Camera::GetBuffer(unsigned char *image){
+bool Camera::GetBuffer(unsigned char *image)
+{
     fd_set fds;
     struct timeval tv;
     int r;

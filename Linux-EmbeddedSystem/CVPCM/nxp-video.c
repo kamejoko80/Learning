@@ -488,17 +488,24 @@ static int nxp_vb2_buf_init(struct vb2_buffer *vb)
     u32 type = vb->vb2_queue->type;
 
     pr_debug("%s: type(0x%x)\n", __func__, type);
+    printk("%s: type(0x%x)\n", __func__, type);
 
-    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+    if (type == V4L2_BUF_TYPE_VIDEO_CAPTURE)
+    {
         bufs = me->sink_bufs;
-    } else if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+    }
+    else if (type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE)
+    {
         bufs = me->source_bufs;
-    } else {
+    }
+    else
+    {
         pr_err("%s: invalid buffer type(0x%x)\n", __func__, type);
         return -EINVAL;
     }
 
-    if (!bufs[index]) {
+    if (!bufs[index])
+    {
         buf = kzalloc(sizeof(*buf), GFP_KERNEL);
         if (!buf) {
             pr_err("%s: failed to allocat nxp_video_buffer\n", __func__);
@@ -563,6 +570,7 @@ static int nxp_vb2_stop_streaming(struct vb2_queue *q)
     return 0;
 }
 
+// called from qbuf
 /* real queue!!! */
 static void nxp_vb2_buf_queue(struct vb2_buffer *vb)
 {
@@ -894,9 +902,14 @@ static int nxp_video_reqbufs(struct file *file, void *fh,
 {
     struct nxp_video *me = file->private_data;
     pr_debug("%s: %s\n", __func__, me->name);
-    if (me->vbq) { /* capture, out */
+    printk("%s: %s\n", __func__, me->name);
+    
+    if (me->vbq)
+    { /* capture, out */
         return vb2_reqbufs(me->vbq, b); /* call to queue_setup */
-    } else { /* m2m */
+    }
+    else
+    { /* m2m */
         struct vb2_queue *vq = v4l2_m2m_get_vq(me->m2m_ctx, b->type);
         return vb2_reqbufs(vq, b);
     }

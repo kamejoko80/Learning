@@ -33,7 +33,7 @@ int main(int argc, char ** argv) {
 		return -1;
 	}
 
-    	memset(dev_name, 0, sizeof(char) * DEV_NAME_LENGTH);
+    memset(dev_name, 0, sizeof(char) * DEV_NAME_LENGTH);
 	strcpy(dev_name, argv[1]);
 
 	if(!strcmp(dev_name, "/dev/video4"))
@@ -48,17 +48,17 @@ int main(int argc, char ** argv) {
 	if(!strcmp(argv[2], "640x480"))
 	{
 		width = 640;
-    		height = 480;
+    	height = 480;
 	}
 	else if(!strcmp(argv[2], "800x600"))
 	{
 		width = 800;
-                height = 600;
+        height = 600;
 	}
 	else
 	{
 		width = 640;
-                height = 480;
+        height = 480;
 	}
 
     outf = fopen("out.yuv", "wb");
@@ -70,8 +70,9 @@ int main(int argc, char ** argv) {
 
     camera = new Camera(dev_name, width, height, camera_type);
     
-    if(!camera->OpenDevice()){
-	printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+    if(!camera->OpenDevice())
+    {
+	    printf("fun:%s failed, line = %d\n", __FUNCTION__, __LINE__);
         return -1;
     }
 	
@@ -82,24 +83,32 @@ int main(int argc, char ** argv) {
     printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
     
     starttime = clock();
+    
     //int frames=50;
     unsigned int writesize=0;
 	printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-    for(int i=0;i<NUM_FRAM;i++){
-        if(!camera->GetBuffer(image)){
-		printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+    
+    for(int i = 0; i < NUM_FRAM; i++)
+    {
+        if(!camera->GetBuffer(image))
+        {
+		    printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
             break;
         }
+
 		printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-        writesize=fwrite(image,1,image_size,outf);
+        writesize = fwrite(image, 1, image_size, outf);
         //fflush(outf);
-        printf("frame:%d,writesize:%d\n",i,writesize);
+        printf("frame:%d,writesize:%d\n", i, writesize);
     }
 
 	printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+    
     endtime = clock();
+    
     totaltime = (double)( (endtime - starttime)/(double)CLOCKS_PER_SEC );
-    printf("time :%f, rate :%f\n",totaltime,NUM_FRAM/totaltime);
+    printf("time :%f, rate :%f\n", totaltime, NUM_FRAM / totaltime);
+    
     camera->CloseDevice();
     fclose(outf);
     return 0;

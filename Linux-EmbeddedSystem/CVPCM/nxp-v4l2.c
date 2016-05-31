@@ -43,7 +43,7 @@ struct v4l2_device *nxp_v4l2_get_v4l2_device(void)
 void *nxp_v4l2_get_alloc_ctx(void)
 {
     if (likely(__me))
-        return &__me->v4l2_dev;
+        return __me->alloc_ctx;
     return NULL;
 }
 

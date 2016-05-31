@@ -176,7 +176,6 @@ bool Camera::init_mmap(void)
     req.count = 4;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     req.memory = V4L2_MEMORY_MMAP;
-    
     if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req))
     {
         if (EINVAL == errno)
@@ -190,7 +189,8 @@ bool Camera::init_mmap(void)
             return false;
         }
     }
-    
+
+#if 1   
     if (req.count < 2)
     {
         fprintf(stderr, "Insufficient buffer memory on %s\n", dev_name);
@@ -221,7 +221,7 @@ bool Camera::init_mmap(void)
         if (MAP_FAILED == buffers[n_buffers].start)
             return false;
     }
-
+#endif
     return true;
 }
 

@@ -459,7 +459,8 @@ static int nxp_vb2_queue_setup(struct vb2_queue *q, const struct v4l2_format *fm
 
     *num_planes = (unsigned int)(frame->format.num_planes);
 
-    for (i = 0; i < *num_planes; ++i) {
+    for (i = 0; i < *num_planes; ++i)
+    {
         alloc_ctxs[i] = me->vb2_alloc_ctx;
     }
 

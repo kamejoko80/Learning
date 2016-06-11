@@ -1,6 +1,6 @@
 clear all;
-framepath = '..\..\..\..\..\data\pedestrainTrackingFrame\';
-dispPath = '..\..\..\..\..\data\pedestrainTrackingFrame\disp290x202\';
+framepath = '../../../../../data/pedestrainTrackingFrame/';
+dispPath = '../../../../../data/pedestrainTrackingFrame/disp290x202/';
 
 frame = imread([framepath 'right' num2str(0) '.png']);
 frame_gray = rgb2gray(frame);

@@ -120,32 +120,32 @@ bool Camera::start_capturing(void)
 {
     unsigned int i;
     enum v4l2_buf_type type;
-	
+
     printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     for (i = 0; i < n_buffers; ++i)
     {
         struct v4l2_buffer buf;
         CLEAR (buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
+        buf.memory = V4L2_MEMORY_MMAP;//V4L2_MEMORY_USERPTR;
         buf.index = i;
-        
+
         if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
-	    {
-		    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+        {
+            printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
             return false;
-	    }
+        }
     }
-    
+
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    
+
     if (-1 == xioctl(fd, VIDIOC_STREAMON, &type))
     {
-	    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+        printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
         return false;
     }
 
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     return true;
 }
 
@@ -190,21 +190,21 @@ bool Camera::init_mmap(void)
         }
     }
 
-#if 1   
+#if 1
     if (req.count < 2)
     {
         fprintf(stderr, "Insufficient buffer memory on %s\n", dev_name);
         return false;
     }
-    
+
     buffers = (buffer*)calloc(req.count, sizeof(*buffers));
-    
+
     if (!buffers)
     {
         fprintf(stderr, "Out of memory\n");
         return false;
     }
-    
+
     for (n_buffers = 0; n_buffers < req.count; ++n_buffers)
     {
         struct v4l2_buffer buf;
@@ -277,17 +277,26 @@ bool Camera::init_device(void)
 	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     printf("-#-#-#-#-#-#-#-#-#-#-#-#-#-\n");
     printf("\n");
+
     ////////////crop finished!
     //////////set the format
+
     CLEAR (fmt);
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt.fmt.pix.width = width;
     fmt.fmt.pix.height = height;
-    //V4L2_PIX_FMT_YVU420, V4L2_PIX_FMT_YUV420 ¡ª Planar formats with 1/2 horizontal and vertical chroma resolution, also known as YUV 4:2:0
+
+    //V4L2_PIX_FMT_YVU420, V4L2_PIX_FMT_YUV420
+    //Planar formats with 1/2 horizontal and vertical chroma resolution, also known as YUV 4:2:0
+
     //V4L2_PIX_FMT_YUYV ¡ª Packed format with 1/2 horizontal chroma resolution, also known as YUV 4:2:2
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;//V4L2_PIX_FMT_YUYV;//V4L2_PIX_FMT_YUV420;//V4L2_PIX_FMT_YUYV;
-	//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+
+    //V4L2_PIX_FMT_YUYV;//V4L2_PIX_FMT_YUV420;//V4L2_PIX_FMT_YUYV;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;
+    //fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+
     //fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
+
     {
         printf("-#-#-#-#-#-#-#-#-#-#-#-#-#-\n");
         printf("=====will set fmt to (%d, %d)--", fmt.fmt.pix.width,
@@ -404,20 +413,20 @@ bool Camera::OpenDevice()
         printf("open success\n");
         if (init_device())
         {
-		    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+            printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
             if (start_capturing())
-		        printf("************** %s, line = %d failed\n", __FUNCTION__, __LINE__);
+                printf("************** %s succeed, line = %d\n", __FUNCTION__, __LINE__);
             return true;
         }
-	    else
-	    {
-		    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-	    }
+        else
+        {
+            printf("************** %s failed, line = %d\n", __FUNCTION__, __LINE__);
+        }
     }
     else
     {
         printf("open failed\n");
-	    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
+        printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
         return false;
     }
 }

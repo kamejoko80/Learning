@@ -349,13 +349,21 @@ _fill_nxp_video_buffer(struct nxp_video_buffer *buf, struct vb2_buffer *vb)
         frame = &me->frame[1];
 
     is_separated = frame->format.is_separated;
-    for (i = 0; i < frame->format.num_sw_planes; i++) {
+    for (i = 0; i < frame->format.num_sw_planes; i++)
+    {
         if (i == 0 || is_separated)
+        {
             buf->dma_addr[i] = plane_addr(vb, i);
+        }
         else
+        {
             buf->dma_addr[i] = buf->dma_addr[i-1] + frame->size[i-1];
+        }
+
         buf->stride[i] = frame->stride[i];
         pr_debug("[BUF plane %d] addr(0x%x), s(%d)\n",
+                i, buf->dma_addr[i], buf->stride[i]);
+        printk("## [BUF plane %d] addr(0x%x), s(%d)\n",
                 i, buf->dma_addr[i], buf->stride[i]);
     }
 
@@ -383,6 +391,8 @@ _find_consumer(struct nxp_video *me, struct list_head *head, int index)
     }
     spin_unlock_irqrestore(&me->lock_consumer, flags);
 
+    printk("## %s succeed", __func__);
+
     return c;
 }
 
@@ -407,6 +417,8 @@ static int buffer_done(struct nxp_video_buffer *buf)
     }
 
     pr_debug("%s: type(0x%x), ci(%d), count(%d)\n",
+             __func__, type, ci, consumer_count);
+    printk("## %s: type(0x%x), ci(%d), count(%d)\n",
              __func__, type, ci, consumer_count);
 
     if (ci >= consumer_count) {
@@ -510,6 +522,7 @@ static int nxp_vb2_buf_init(struct vb2_buffer *vb)
         buf = kzalloc(sizeof(*buf), GFP_KERNEL);
         if (!buf) {
             pr_err("%s: failed to allocat nxp_video_buffer\n", __func__);
+            printk("%s: failed to allocat nxp_video_buffer\n", __func__);
             return -ENOMEM;
         }
         buf->priv        = vb;
@@ -589,22 +602,27 @@ static void nxp_vb2_buf_queue(struct vb2_buffer *vb)
         c = _find_consumer(me, &me->source_consumer_list, 0);
     } else {
         pr_err("%s: invalid buffer type(0x%x)\n", __func__, type);
+        printk("%s: invalid buffer type(0x%x)\n", __func__, type);
         return;
     }
 
     if (!buf || !c) {
         pr_err("%s: No consumer or No buf!!!\n", __func__);
+        printk("%s: No consumer or No buf!!!\n", __func__);
         return;
     }
 
     ret = _fill_nxp_video_buffer(buf, vb);
-    if (ret < 0) {
+    if (ret < 0)
+    {
         pr_err("%s: fatal error!!!\n", __func__);
+        printk("%s: fatal error!!!\n", __func__);
         vb2_buffer_done(vb, VB2_BUF_STATE_ERROR);
         return;
     }
 
     pr_debug("%s buf(%p)\n", __func__, buf);
+    printk("%s buf(%p)\n", __func__, buf);
     c->queue(buf, c->priv);
 
     /* for m2m : TODO */
@@ -796,7 +814,7 @@ static int nxp_video_get_format(struct file *file, void *fh,
         printk("%s: can't get remote source subdev\n", __func__);
         return -EINVAL;
     }
-    
+
     f = &frame->format; 
     ret = v4l2_subdev_call(subdev, pad, get_fmt, fh, f);
     if (ret < 0) {
@@ -963,11 +981,13 @@ static int nxp_video_streamon(struct file *file, void *fh,
     struct v4l2_subdev *subdev = _get_remote_subdev(me, i, &pad);
     void *hostdata_back;
 
-     vmsg("%s: me %p, %s\n", __func__, me, me->name);
+    vmsg("%s: me %p, %s\n", __func__, me, me->name);
+    printk("## %s: me %p, %s\n", __func__, me, me->name);
 
     if (me->vbq) {
         ret = vb2_streamon(me->vbq, i);
         if (ret < 0) {
+            printk("%s: failed to vb2_streamon()\n", __func__);
             pr_err("%s: failed to vb2_streamon()\n", __func__);
             return ret;
         }
@@ -975,6 +995,7 @@ static int nxp_video_streamon(struct file *file, void *fh,
         struct vb2_queue *vq = v4l2_m2m_get_vq(me->m2m_ctx, i);
         ret = vb2_streamon(vq, i);
         if (ret < 0) {
+            printk("%s: m2m, failed to vb2_streamon()\n", __func__);
             pr_err("%s: m2m, failed to vb2_streamon()\n", __func__);
             return ret;
         }
@@ -1454,7 +1475,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     int ret;
     struct vb2_queue *vbq = NULL;
     struct nxp_video *me = kzalloc(sizeof(struct nxp_video), GFP_KERNEL);
-    
+
     int pad_num = 0;
 
     if (!me) {
@@ -1481,7 +1502,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     }
 
     mutex_init(&me->lock);
-    
+
 
     me->register_buffer_consumer = _register_buffer_consumer;
     me->unregister_buffer_consumer = _unregister_buffer_consumer;
@@ -1494,30 +1515,41 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     me->vdev.release   = video_device_release;
     me->vdev.lock      = &me->lock;
 
-    if (type != NXP_VIDEO_TYPE_M2M) {
+    if (type != NXP_VIDEO_TYPE_M2M)
+    {
         vbq = kzalloc(sizeof(*vbq), GFP_KERNEL);
-        if (!vbq) {
+        if (!vbq)
+        {
             pr_err("%s: failed to allocate vbq\n", __func__);
+            printk("%s: failed to allocate vbq\n", __func__);
             ret = -ENOMEM;
             goto error_vbq_alloc;
         }
+
         vbq->type     = type == NXP_VIDEO_TYPE_CAPTURE ?
             V4L2_BUF_TYPE_VIDEO_CAPTURE : V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE;
         vbq->io_modes = VB2_MMAP | VB2_USERPTR | VB2_DMABUF;
         vbq->drv_priv = me;
         vbq->ops      = &nxp_vb2_ops;
         vbq->mem_ops  = &vb2_ion_memops;
+
         ret = vb2_queue_init(vbq);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             pr_err("%s: failed to vb2_queue_init()\n", __func__);
+            printk("## %s: failed to vb2_queue_init()\n", __func__);
             goto error_vbq_init;
         }
         me->vbq = vbq;
-    } else {
+    }
+    else
+    {
         /* m2m */
         me->m2m_dev = v4l2_m2m_init(&nxp_m2m_ops);
-        if (IS_ERR(me->m2m_dev)) {
+        if (IS_ERR(me->m2m_dev))
+        {
             pr_err("%s: failed to v4l2_m2m_init()\n", __func__);
+            printk("## %s: failed to v4l2_m2m_init()\n", __func__);
             ret = -ENOMEM;
             goto error_vbq_alloc;
         }
@@ -1530,6 +1562,7 @@ struct nxp_video *create_nxp_video(char *name, u32 type,
     video_set_drvdata(&me->vdev, me);
 
     pr_debug("%s: success!!!\n", __func__);
+    printk("## %s: success!!!\n", __func__);
     return me;
 
 error_vbq_init:

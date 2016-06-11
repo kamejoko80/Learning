@@ -2141,9 +2141,12 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
     int ret = 0;
 
     printk("##%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
-    //ov5640_video_probe(client);
-    if (enable) {
-        if (!priv->win || !priv->cfmt) {
+
+    ov5640_video_probe(client);
+    if (enable)
+    {
+        if (!priv->win || !priv->cfmt)
+        {
             dev_err(&client->dev, "norm or win select error\n");
             return -EPERM;
         }
@@ -2154,11 +2157,12 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 
             ret = ov5640_write_array(client, ov5640_init_regs);
             //ret = ov5640_write_array(client, ov5640_svga_init_regs);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 printk(KERN_ERR "%s: failed to ov5640_write_array init regs\n", __func__);
                 return -EIO;
             }
-            
+
             //this is very important,it must be CCIR656 enable,and after init ov5640 regs.
             printk("%s  line %d  ..CCIR656 CTRL00 enable .....\n",__func__,__LINE__);
             reg_write(client, 0x4730,0x01);
@@ -2384,6 +2388,7 @@ static const struct media_entity_operations ov5640_media_ops = {
  */
 static void ov5640_priv_init(struct ov5640_priv * priv)
 {
+    printk("## %s", __func__);
     priv->model = V4L2_IDENT_OV5640;
     priv->prev_capt_mode = PREVIEW_MODE;
     priv->timeperframe.denominator = 12;//30;

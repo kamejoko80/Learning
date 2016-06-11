@@ -6,7 +6,7 @@
 #include "camera.h"
 
 #define DEV_NAME_LENGTH		50
-#define NUM_FRAM		50
+#define NUM_FRAM        1
 
 int main(int argc, char ** argv) {
     //char *dev_name = "/dev/video0";	//ITU
@@ -21,9 +21,8 @@ int main(int argc, char ** argv) {
 
     if(argc != 3)
     {
-	printf("usage: ./camera /dev/video0 640x480\n");
-	
-	return 0;
+        printf("usage: ./camera /dev/video0 640x480\n");
+        return 0;
     }
 
 	dev_name = (char *)malloc(sizeof(char) * DEV_NAME_LENGTH);
@@ -69,46 +68,48 @@ int main(int argc, char ** argv) {
     double totaltime;
 
     camera = new Camera(dev_name, width, height, camera_type);
-    
+
     if(!camera->OpenDevice())
     {
-	    printf("fun:%s failed, line = %d\n", __FUNCTION__, __LINE__);
+        printf("fun:%s failed, line = %d\n", __FUNCTION__, __LINE__);
         return -1;
     }
-	
+
     printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-    
+
     image_size = camera->getImageSize();
-	
+
     printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-    
+
+#if 1
     starttime = clock();
-    
+
     //int frames=50;
     unsigned int writesize=0;
-	printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-    
+    printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+
     for(int i = 0; i < NUM_FRAM; i++)
     {
         if(!camera->GetBuffer(image))
         {
-		    printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+            printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
             break;
         }
 
-		printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+        printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
         writesize = fwrite(image, 1, image_size, outf);
         //fflush(outf);
         printf("frame:%d,writesize:%d\n", i, writesize);
     }
 
-	printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
-    
+    printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+
     endtime = clock();
-    
+
     totaltime = (double)( (endtime - starttime)/(double)CLOCKS_PER_SEC );
     printf("time :%f, rate :%f\n", totaltime, NUM_FRAM / totaltime);
-    
+#endif
+
     camera->CloseDevice();
     fclose(outf);
     return 0;

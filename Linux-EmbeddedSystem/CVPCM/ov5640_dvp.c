@@ -42,7 +42,7 @@
 #include <mach/gpio.h>
 #include <mach/platform.h>
 
-#define OV5640_DEBUG 1
+#define OV5640_DEBUG
 
 #ifdef OV5640_DEBUG
 #define assert(expr) \
@@ -50,7 +50,6 @@
         pr_err("Assertion failed! %s,%s,%s,line=%d\n",	\
 #expr, __FILE__, __func__, __LINE__);	\
     }
-
 #define OV5640_DEBUG(fmt,args...) printk(KERN_ALERT fmt, ##args)
 #else
 
@@ -245,8 +244,8 @@ static  struct regval_list ov5640_scene_night[] __attribute__((unused)) =
  */
 
 static const struct regval_list ov5640_init_regs[] = {
-    {0x3103, 0x11},
-    {0x3008, 0x82},
+    //{0x3103, 0x11},
+    //{0x3008, 0x82},
     {0x3008, 0x42},
     {0x3103, 0x03},
     {0x3017, 0xff},
@@ -747,6 +746,7 @@ static const struct regval_list ov5640_init_regs[] = {
     {0x3008, 0x02},
     {0x3035, 0x21},
     {0x4005, 0x1a}, //BLC always update
+    ENDMARKER,      //The end flag
 };
 
 static struct regval_list ov5640_preview_sxga_regs[] = {
@@ -1480,14 +1480,13 @@ static int reg_read(struct i2c_client *client, u16 reg, u8 *val)
 		return ret < 0 ? ret : -EIO;
 	}
 
-    printk(KERN_ALERT "## %x %x \n", reg, val);
 
 	return 0;
 }
 
 static int reg_write(struct i2c_client *client, u16 reg, u8 val)
 {
-    printk(KERN_ALERT "## %x %x \n", reg, val);
+    printk(KERN_ALERT "## write %x %x \n", reg, val);
 	int ret;
 	unsigned char data[3] = { reg >> 8, reg & 0xff, val };
 
@@ -1497,6 +1496,8 @@ static int reg_write(struct i2c_client *client, u16 reg, u8 val)
 			__func__, reg);
 		return ret < 0 ? ret : -EIO;
 	}
+
+    printk(KERN_ALERT "## %x %x writed \n", reg, val);
 
 	return 0;
 }
@@ -2155,6 +2156,11 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
            // if (!check_id(client))
             //    return -EINVAL;
 
+            reg_write(client, 0x3103, 0x11);
+            reg_write(client, 0x3008, 0x82);
+
+            mdelay(5);
+
             ret = ov5640_write_array(client, ov5640_init_regs);
             //ret = ov5640_write_array(client, ov5640_svga_init_regs);
             if (ret < 0)
@@ -2178,7 +2184,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
         printk("%s  line %d  ..set yuyv format.......\n",__func__,__LINE__);
         reg_write(client, 0x4300, 0x30);
         reg_write(client, 0x501f, 0x00);
-        
+
         ret = ov5640_write_array(client, priv->win->win_regs);
         if (ret < 0) {
             printk(KERN_ERR "%s: failed to ov5640_write_array win regs\n", __func__);
@@ -2409,7 +2415,7 @@ static int ov5640_video_probe(struct i2c_client *client)
 
     gpio_request(CAMERA_PD0,"CAMERA_PD0");
     gpio_request(CAMERA_RST,"CAMERA_RST");
-    
+
     gpio_direction_output(CAMERA_PD0, 1);
     mdelay(5);
 
@@ -2425,7 +2431,7 @@ static int ov5640_video_probe(struct i2c_client *client)
         regulator_enable(camera_power_2p8V);
         mdelay(5);
         regulator_enable(camera_power_1p5V);
-      
+
 // reset
         mdelay(10);
         gpio_direction_output(CAMERA_PD0, 0);

@@ -176,9 +176,7 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 	struct scatterlist *sg;
     int i, ret;
 
-    printk("## func %s line %d", __func__, __LINE__);
-
-	buffer = kzalloc(sizeof(struct ion_buffer), GFP_KERNEL);
+    buffer = kzalloc(sizeof(struct ion_buffer), GFP_KERNEL);
 	if (!buffer)
     {
         printk("## %s : kzalloc error.\n", __func__);
@@ -190,8 +188,6 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 	kref_init(&buffer->ref);
 
 	ret = heap->ops->allocate(heap, buffer, len, align, flags);
-
-    printk("## func %s line %d", __func__, __LINE__);
 
 	if (ret)
     {
@@ -211,8 +207,6 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
         }
 	}
 
-    printk("## func %s line %d", __func__, __LINE__);
-
 	buffer->dev = dev;
 	buffer->size = len;
 
@@ -226,7 +220,6 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 	}
 	buffer->sg_table = table;
 
-    printk("## func %s line %d", __func__, __LINE__);
 
 	if (ion_buffer_fault_user_mappings(buffer)) {
 		int num_pages = PAGE_ALIGN(buffer->size) / PAGE_SIZE;
@@ -252,7 +245,6 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 			goto err;
 	}
 
-    printk("## func %s line %d", __func__, __LINE__);
 	buffer->dev = dev;
 	buffer->size = len;
 	INIT_LIST_HEAD(&buffer->vmas);
@@ -481,7 +473,10 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 	struct ion_heap *heap;
 	int ret;
 
-	pr_debug("%s: len %d align %d heap_id_mask %u flags %x\n", __func__,
+    flags = ION_HEAP_TYPE_SYSTEM_CONTIG;
+    heap_id_mask = flags;
+	
+    pr_debug("%s: len %d align %d heap_id_mask %u flags %x\n", __func__,
 		 len, align, heap_id_mask, flags);
 	printk("## %s: len %d align %d heap_id_mask %u flags %x\n", __func__,
 		 len, align, heap_id_mask, flags);
@@ -515,7 +510,7 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 
 	if (buffer == NULL)
     {
-        printk("##%s: buffer == NULL", __func__);
+        printk("##%s: buffer == NULL\n", __func__);
 		return ERR_PTR(-ENODEV);
     }
 

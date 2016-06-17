@@ -762,7 +762,7 @@ static int nxp_video_querycap(struct file *file, void *fh,
         cap->capabilities = V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_STREAMING;
         break;
     case NXP_VIDEO_TYPE_M2M:
-        cap->capabilities = V4L2_CAP_VIDEO_CAPTURE_MPLANE |
+        cap->capabilities = V4L2_CAP_VIDEO_CAPTURE |
             V4L2_CAP_VIDEO_OUTPUT_MPLANE | V4L2_CAP_STREAMING;
         break;
     default:
@@ -800,7 +800,7 @@ static int nxp_video_get_format(struct file *file, void *fh,
         return -EINVAL;
     }
 
-    if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE) {
+    if (f->type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         frame = &me->frame[0];
     } else if (f->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
         frame = &me->frame[1];
@@ -922,7 +922,7 @@ static int nxp_video_reqbufs(struct file *file, void *fh,
     struct nxp_video *me = file->private_data;
     pr_debug("%s: %s\n", __func__, me->name);
     printk("%s: %s\n", __func__, me->name);
-    
+
     if (me->vbq)
     { /* capture, out */
         return vb2_reqbufs(me->vbq, b); /* call to queue_setup */

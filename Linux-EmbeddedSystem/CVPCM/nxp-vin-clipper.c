@@ -441,6 +441,8 @@ static int _configure(struct nxp_vin_clipper *me, int enable)
     int ret = 0;
     struct v4l2_subdev *remote = _get_remote_source_subdev(me);
 
+    struct v4l2_mbus_framefmt mf;
+
     if (!remote) {
         pr_err("%s: can't find remote source!!!\n", __func__);
         return -EINVAL;
@@ -474,6 +476,7 @@ static int _configure(struct nxp_vin_clipper *me, int enable)
 				}
 			#endif
         }
+        ret = v4l2_subdev_call(remote, video, g_mbus_fmt, &mf);
         ret = v4l2_subdev_call(remote, video, s_stream, enable);
     } else {
         struct nxp_capture *parent = nxp_vin_to_parent(me);

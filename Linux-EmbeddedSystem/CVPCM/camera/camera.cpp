@@ -20,7 +20,7 @@ int c_camera_type = 0;
 Camera::Camera(char *DEV_NAME, int w, int h, int camera_type)
 {
     memcpy(dev_name, DEV_NAME, strlen(DEV_NAME));
-    io = IO_METHOD_MMAP; //IO_METHOD_READ; //IO_METHOD_MMAP;
+    io = IO_METHOD_MMAP; //IO_METHOD_USERPTR; //IO_METHOD_MMAP;
     cap_image_size = 0;
     width = w;
     height = h;
@@ -127,7 +127,7 @@ bool Camera::start_capturing(void)
         struct v4l2_buffer buf;
         CLEAR (buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;//V4L2_MEMORY_USERPTR;
+        buf.memory = V4L2_MEMORY_MMAP; // V4L2_MEMORY_USERPTR;//V4L2_MEMORY_MMAP;
         buf.index = i;
 
         if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
@@ -175,7 +175,7 @@ bool Camera::init_mmap(void)
     CLEAR (req);
     req.count = 4;
     req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    req.memory = V4L2_MEMORY_MMAP;
+    req.memory = V4L2_MEMORY_MMAP; // V4L2_MEMORY_USERPTR; // V4L2_MEMORY_MMAP;
     if (-1 == xioctl(fd, VIDIOC_REQBUFS, &req))
     {
         if (EINVAL == errno)
@@ -210,7 +210,7 @@ bool Camera::init_mmap(void)
         struct v4l2_buffer buf;
         CLEAR (buf);
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        buf.memory = V4L2_MEMORY_MMAP;
+        buf.memory = V4L2_MEMORY_MMAP; // V4L2_MEMORY_MMAP; // V4L2_MEMORY_USERPTR;
         buf.index = n_buffers;
         if (-1 == xioctl(fd, VIDIOC_QUERYBUF, &buf))
             errno_exit("VIDIOC_QUERYBUF");
@@ -222,6 +222,8 @@ bool Camera::init_mmap(void)
             return false;
     }
 #endif
+
+    printf("init mmap succeed.");
     return true;
 }
 

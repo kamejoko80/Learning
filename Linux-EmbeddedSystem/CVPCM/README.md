@@ -27,7 +27,7 @@ nxp-capture.c, however, are more worth of interest for us.
 `create_nxp_capture()` instantialize the structure `nxp_capture`,
 and initialize its three 'children'(subdevice) of capture device ---
 clipper, decimator and csi --- by `nxp_vin_clipper_init()`, `nxp_decimator_init()` 
-and `nxp_csi_init()` respectively. Finaly, it links the csi(source) to clipper(sink),  
+and `nxp_csi_init()` respectively. Finaly, it links the csi(source) to clipper(sink), 
 clipper(source) to decimator(sink). 
 
 `register_nxp_capture()` 

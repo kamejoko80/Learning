@@ -246,7 +246,7 @@ static  struct regval_list ov5640_scene_night[] __attribute__((unused)) =
 static const struct regval_list ov5640_init_regs[] = {
     //{0x3103, 0x11},
     //{0x3008, 0x82},
-    {0x3008, 0x42},
+    //{0x3008, 0x42},
     {0x3103, 0x03},
     {0x3017, 0xff},
     {0x3018, 0xff},
@@ -1486,7 +1486,6 @@ static int reg_read(struct i2c_client *client, u16 reg, u8 *val)
 
 static int reg_write(struct i2c_client *client, u16 reg, u8 val)
 {
-    printk(KERN_ALERT "## write %x %x \n", reg, val);
 	int ret;
 	unsigned char data[3] = { reg >> 8, reg & 0xff, val };
 
@@ -1497,7 +1496,6 @@ static int reg_write(struct i2c_client *client, u16 reg, u8 val)
 		return ret < 0 ? ret : -EIO;
 	}
 
-    printk(KERN_ALERT "## %x %x writed \n", reg, val);
 
 	return 0;
 }
@@ -2143,7 +2141,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 
     printk("##%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
 
-    ov5640_video_probe(client);
+    //ov5640_video_probe(client);
     if (enable)
     {
         if (!priv->win || !priv->cfmt)
@@ -2158,8 +2156,9 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 
             reg_write(client, 0x3103, 0x11);
             reg_write(client, 0x3008, 0x82);
-
             mdelay(5);
+            reg_write(client, 0x3008, 0x02);
+            mdelay(30);
 
             ret = ov5640_write_array(client, ov5640_init_regs);
             //ret = ov5640_write_array(client, ov5640_svga_init_regs);
@@ -2201,6 +2200,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
         ov5640_write_array(client, ov5640_disable_regs);
     }
 
+    printk("func %s succeed.\n", __func__);
     return ret;
 }
 
@@ -2442,7 +2442,19 @@ static int ov5640_video_probe(struct i2c_client *client)
         mdelay(30);
     //}
 
-	gpio_free(CAMERA_PD0);
+#if 0
+    // write regs test
+    reg_write(client, 0x3103, 0x11);
+    reg_write(client, 0x3008, 0x82);
+    //gpio_direction_output(CAMERA_RST, 0);
+    mdelay(20);
+    reg_write(client, 0x3008, 0x02);
+    //gpio_direction_output(CAMERA_RST, 1);
+    mdelay(50);
+    reg_write(client, 0x3103, 0x03);
+#endif
+
+    gpio_free(CAMERA_PD0);
     gpio_free(CAMERA_RST);
     regulator_put(camera_power_2p8V);
     regulator_put(camera_power_1p5V);

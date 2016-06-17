@@ -245,6 +245,8 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 			goto err;
 	}
 
+    printk("## func %s line %d\n", __func__, __LINE__);
+
 	buffer->dev = dev;
 	buffer->size = len;
 	INIT_LIST_HEAD(&buffer->vmas);
@@ -262,6 +264,8 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
 	mutex_lock(&dev->buffer_lock);
 	ion_buffer_add(dev, buffer);
 	mutex_unlock(&dev->buffer_lock);
+
+    printk("## func %s line %d\n", __func__, __LINE__);
 	return buffer;
 
 err:
@@ -473,12 +477,10 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 	struct ion_heap *heap;
 	int ret;
 
-    flags = ION_HEAP_TYPE_SYSTEM_CONTIG;
+    flags = ION_HEAP_TYPE_CARVEOUT; //ION_HEAP_TYPE_SYSTEM_CONTIG;
     heap_id_mask = flags;
 	
     pr_debug("%s: len %d align %d heap_id_mask %u flags %x\n", __func__,
-		 len, align, heap_id_mask, flags);
-	printk("## %s: len %d align %d heap_id_mask %u flags %x\n", __func__,
 		 len, align, heap_id_mask, flags);
 	
     /*
@@ -493,6 +495,9 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 		return ERR_PTR(-EINVAL);
     }
 	len = PAGE_ALIGN(len);
+	
+    printk("## %s: len %d align %d heap_id_mask %u flags %x\n", __func__,
+		 len, align, heap_id_mask, flags);
 
 	down_read(&dev->lock);
 	plist_for_each_entry(heap, &dev->heaps, node) {
@@ -501,10 +506,7 @@ struct ion_handle *ion_alloc(struct ion_client *client, size_t len,
 			continue;
 		buffer = ion_buffer_create(heap, dev, len, align, flags);
 		if (!IS_ERR(buffer))
-        {
-            printk("##%s: plist error", __func__);
 			break;
-        }
 	}
 	up_read(&dev->lock);
 

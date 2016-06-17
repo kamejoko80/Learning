@@ -69,7 +69,7 @@ int Camera::read_frame(unsigned char *image)
     CLEAR (buf);
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
-    
+
     if (-1 == xioctl(fd, VIDIOC_DQBUF, &buf))
     {
         switch (errno)
@@ -91,9 +91,9 @@ int Camera::read_frame(unsigned char *image)
     assert(buf.index < n_buffers);
 	
     printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-    
+
     memcpy(image,buffers[0].start,cap_image_size);
-    
+
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         errno_exit("VIDIOC_QBUF");
 

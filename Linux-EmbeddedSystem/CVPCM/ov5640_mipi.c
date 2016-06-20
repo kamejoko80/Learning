@@ -38,13 +38,6 @@
 #include <mach/gpio.h>
 #include <mach/platform.h>
 
-// TODO : move this to PLAT/device.c
-#if 0
-static struct i2c_board_info asoc_i2c_camera = {
-    I2C_BOARD_INFO(MODULE_NAME, 0x30),//caichsh
-};
-#endif
-
 #ifdef OV5645_DEBUG
 #define assert(expr) \
     if (unlikely(!(expr))) {				\
@@ -60,11 +53,8 @@ static struct i2c_board_info asoc_i2c_camera = {
 #define OV5645_DEBUG(fmt,args...)
 #endif
 
-#define PID                 0x02 /* Product ID Number  *///caichsh
-#define OV5645              0x53
 #define OUTTO_SENSO_CLOCK   24000000
 #define NUM_CTRLS           11
-#define V4L2_IDENT_OV5645   64188
 
 /* private ctrls */
 #define V4L2_CID_SCENE_EXPOSURE         (V4L2_CTRL_CLASS_CAMERA | 0x1001)
@@ -863,44 +853,6 @@ static inline struct v4l2_subdev *ctrl_to_sd(struct v4l2_ctrl *ctrl)
 {
     return &container_of(ctrl->handler, struct ov5645_priv, hdl)->subdev;
 }
-/*
-static bool check_id(struct i2c_client *client)
-{
-    u8 pid = i2c_smbus_read_byte_data(client, PID);
-    if (pid == ov5645)
-        return true;
-
-    printk(KERN_ERR "failed to check id: 0x%x\n", pid);
-    return false;
-}*/
-/*
-static int ov5645_write_array(struct i2c_client *client, const struct regval_list *vals)
-{
-    int ret;
-    while (vals->reg_num != 0xff) {
-        ret = i2c_smbus_write_byte_data(client, vals->reg_num, vals->value);
-        if (ret < 0)
-            return ret;
-        vals++;
-    }
-    return 0;
-}*/
-/*
-static int ov5645_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set) __attribute__((unused));
-static int ov5645_mask_set(struct i2c_client *client, u8 command, u8 mask, u8 set)
-{
-    s32 val = i2c_smbus_read_byte_data(client, command);
-    if (val < 0)
-        return val;
-
-    val &= ~mask;
-    val |= set & mask;
-
-    return i2c_smbus_write_byte_data(client, command, val);
-}
-*/
-
-
 
 static int reg_read(struct i2c_client *client, u16 reg, u8 *val)
 {
@@ -1791,7 +1743,7 @@ static const struct media_entity_operations ov5645_media_ops = {
  */
 static void ov5645_priv_init(struct ov5645_priv * priv)
 {
-    priv->model = V4L2_IDENT_OV5645;
+    priv->model = V4L2_IDENT_OV5640_MIPI;
     priv->prev_capt_mode = PREVIEW_MODE;
     priv->timeperframe.denominator = 12;//30;
     priv->timeperframe.numerator = 1;
@@ -1803,47 +1755,8 @@ static int ov5645_video_probe(struct i2c_client *client)
 	int ret;
 	u8 id_high, id_low;
 	u16 id;
-//  added by yang and hoping 
-        
-// power up
-        struct regulator *camera_power_1p5V = NULL;
-        struct regulator *camera_power_2p8V = NULL;
 
-        gpio_request(CAMERA_PD0,"CAMERA_PD0");
-        gpio_request(CAMERA_RST,"CAMERA_RST");
-        
-        gpio_direction_output(CAMERA_PD0, 1);
-        mdelay(5);
-
-        camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
-        camera_power_1p5V = regulator_get(NULL,"vcam1_1.5V");
-
-    if (regulator_get_voltage(camera_power_2p8V) != 2800000)
-    {
-        printk("##: OV5640 mipi set voltage");
-        regulator_set_voltage(camera_power_2p8V, 2800000, 2800000);
-        regulator_set_voltage(camera_power_1p5V, 1500000, 1500000);
-        printk(KERN_ALERT "#####: camera_power_1.5V...");
-        regulator_enable(camera_power_2p8V);
-        mdelay(5);
-        regulator_enable(camera_power_1p5V);
-      
-// reset
-        mdelay(10);
-        gpio_direction_output(CAMERA_PD0, 0);
-// set CLK
-        nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
-        mdelay(5);
-        gpio_direction_output(CAMERA_RST, 1);
-        mdelay(30);
-    }
-
-	gpio_free(CAMERA_PD0);
-        gpio_free(CAMERA_RST);
-    regulator_put(camera_power_2p8V);
-    regulator_put(camera_power_1p5V);
-//  end
-	/* Read sensor Model ID */
+    /* Read sensor Model ID */
 	ret = reg_read(client, 0x300a, &id_high);
 	if (ret < 0)
     {
@@ -1889,8 +1802,7 @@ static int ov5645_probe(struct i2c_client *client, const struct i2c_device_id *i
 
     ov5645_video_probe(client);
 
-    /* register subdev */
-    //v4l2_i2c_subdev_init(sd, client, &ov5645_subdev_ops);
+    v4l2_i2c_subdev_init(sd, client, &ov5645_subdev_ops);
 
     sd->flags |= V4L2_SUBDEV_FL_HAS_DEVNODE;
     priv->pad.flags = MEDIA_PAD_FL_SOURCE;

@@ -542,6 +542,7 @@ static const struct regval_list ov5640_init_regs[] = {
     {0x583b, 0x28},
     {0x583c, 0x42},
     {0x583d, 0xce},
+
 #else
     /*
     {0x5800, 0x39},
@@ -1119,7 +1120,7 @@ static const struct regval_list ov5640_svga_init_regs[] =
 
 static const struct regval_list ov5640_svga_regs[] = {
 
-    #if 0
+#if 0
     	//;OV5640MIPI 1280x960,30fps
 	//56Mhz, 224Mbps/Lane, 2Lane.
 	{0x4202, 0x0f},//	; stop mipi stream
@@ -1192,9 +1193,9 @@ static const struct regval_list ov5640_svga_regs[] = {
 
     {0x503d,0x80},// color bar test
 	//OV5640MIPIWriteExtraShutter(OV5640MIPISensor.PreviewExtraShutter);
+#endif
 
-
-    #else
+#if 0
         	{0x4202, 0x0f},//	; stop mipi stream
         {0x300e, 0x45},//	; MIPI 2 lane
 		{0x3034, 0x18},// PLL, MIPI 8-bit mode
@@ -1267,8 +1268,61 @@ static const struct regval_list ov5640_svga_regs[] = {
 	{0x4202, 0x00},//	; open mipi stream
 
    //      {0x503d,0x80},// color bar test
-    #endif
-    ENDMARKER
+#endif
+
+#if 1
+    {0x3036,0x23},
+//  {0x3037,0x13},  //vco freq=24*70/3=560M
+//  {0x3034,0x1a},
+    {0x3035,0x41},
+//  {0x3108,0x01},  //sys_clk=560/1/2/2.5/2=56M, framerate=sys_clk/hts/vts=30
+    {0x3824,0x02},
+    {0x460C,0x22},  //dvp_pclk controlled by REG(0x3824)
+
+    {0x3C07,0x08},
+    {0x3820,0x41}, //ryj modify 0x47
+    {0x3821,0x07}, //ryj modify 0x01
+    {0x3814,0x31},
+    {0x3815,0x31},
+    {0x3803,0x04},
+    {0x3807,0x9B},
+    //DVP output size 640*480
+    {0x3808,0x02},
+    {0x3809,0x80},
+    {0x380A,0x01},
+    {0x380B,0xE0},
+    //HTS 1896
+    {0x380C,0x07},
+    {0x380D,0x68},
+    //VTS 984
+    {0x380E,0x03},
+    {0x380F,0xD8},
+
+    {0x3813,0x06},
+    {0x3618,0x00},
+    {0x3612,0x29},
+    {0x3708,0x64},
+    {0x3709,0x52},
+    {0x370C,0x03},
+    {0x3A02,0x03},
+    {0x3A03,0xD8},
+    {0x3A0E,0x03},
+    {0x3A0D,0x04},
+    {0x3A14,0x03},
+    {0x3A15,0xD8},
+    {0x4004,0x02},
+    {0x4713,0x03},
+    {0x4407,0x04},
+    {0x460B,0x35},
+    {0x5001,0xA3},
+    {0x3008,0x02},
+    {0x3002,0x1c},
+    {0x3006,0xc3},
+    //enable AEC/AGC
+    {0x3503,0x00},
+#endif
+
+    ENDMARKER,
 };
 
 static const struct regval_list ov5640_uxga_regs[] = {//caichsh
@@ -2395,7 +2449,7 @@ static const struct media_entity_operations ov5640_media_ops = {
 static void ov5640_priv_init(struct ov5640_priv * priv)
 {
     printk("## %s", __func__);
-    priv->model = V4L2_IDENT_OV5640;
+    priv->model = V4L2_IDENT_OV5640_DVP;
     priv->prev_capt_mode = PREVIEW_MODE;
     priv->timeperframe.denominator = 12;//30;
     priv->timeperframe.numerator = 1;

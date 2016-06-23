@@ -345,7 +345,7 @@ static const struct regval_list ov5640_init_regs[] = {
     {0x3006, 0xc3},
     {0x300e, 0x58},
     {0x302e, 0x00},
-    {0x4300, 0x32}, //UYVY
+    {0x4300, 0x30}, //YUYV
     {0x501f, 0x00},
     {0x4713, 0x03},
     {0x4407, 0x04},
@@ -925,7 +925,7 @@ static const struct regval_list ov5640_svga_init_regs[] =
 	{0x4005, 0x18},//	; BLC update triggered by gain change
 	{0x4050, 0x6e},//	; BLC line number
 	{0x4051, 0x8f},//	; BLC update triggered by gain change
-	{0x4300, 0x32},//	; YUV 422, YUYV
+	{0x4300, 0x30},//	; YUV 422, YUYV
 	{0x4514, 0x00},//
 	{0x4520, 0xb0},//
 	{0x460b, 0x37},//
@@ -1119,162 +1119,10 @@ static const struct regval_list ov5640_svga_init_regs[] =
 };
 
 static const struct regval_list ov5640_svga_regs[] = {
-
-#if 0
-    	//;OV5640MIPI 1280x960,30fps
-	//56Mhz, 224Mbps/Lane, 2Lane.
-	{0x4202, 0x0f},//	; stop mipi stream
-	{0x300e, 0x45},//	; MIPI 2 lane
-	{0x3034, 0x18},// PLL, MIPI 8-bit mode
-	{0x3035, 0x21},// PLL
-	{0x3036, 0x70},// PLL
-	{0x3037, 0x13},// PLL
-	{0x3108, 0x01},// PLL
-	{0x3824, 0x01},// PLL
-	{0x460c, 0x20},// PLL
-	{0x3618, 0x00},//
-	{0x3600, 0x09},//
-	{0x3601, 0x43},//
-	{0x3708, 0x66},//
-	{0x3709, 0x12},//
-	{0x370c, 0xc3},//
-	{0x3800, 0x00}, // HS = 0
-	{0x3801, 0x00}, // HS
-	{0x3802, 0x00}, // VS = 250
-	{0x3803, 0x06}, // VS
-	{0x3804, 0x0a}, // HW = 2623
-	{0x3805, 0x3f},//	; HW
-	{0x3806, 0x07},//	; VH = 
-	{0x3807, 0x9d},//	; VH
-	{0x3808, 0x05},//	; DVPHO = 1280
-	{0x3809, 0x00},//	; DVPHO
-	{0x380a, 0x03},//	; DVPVO = 960
-	{0x380b, 0xc0},//	; DVPVO
-	{0x380c, 0x07},//	; HTS = 2160
-	{0x380d, 0x68},//	; HTS
-	{0x380e, 0x03},//	; VTS = 740
-	{0x380f, 0xd8},//	; VTS
-	{0x3810, 0x00}, // H OFF = 16
-	{0x3811, 0x10}, // H OFF
-	{0x3812, 0x00}, // V OFF = 4
-	{0x3813, 0x06},//	; V OFF
-	{0x3814, 0x31},//	; X INC
-	{0x3815, 0x31},//	; Y INC
-	{0x3820, 0x47},//	; flip off, V bin on
-	{0x3821, 0x07},//	; mirror on, H bin on
-	{0x4514, 0x00},
-	{0x3a02, 0x03},//	; max exp 60 = 740
-	{0x3a03, 0xd8},//	; max exp 60
-	{0x3a08, 0x01},//	; B50 = 222
-	{0x3a09, 0x27},//	; B50
-	{0x3a0a, 0x00},//	; B60 = 185
-	{0x3a0b, 0xf6},//	; B60
-	{0x3a0e, 0x03},//	; max 50
-	{0x3a0d, 0x04},//	; max 60
-	{0x3a14, 0x03},//	; max exp 50 = 740
-	{0x3a15, 0xd8},//	; max exp 50
-	{0x3c07, 0x07},//	; 50/60 auto detect
-	{0x3c08, 0x01},//	; 50/60 auto detect
-	{0x3c09, 0xc2},//	; 50/60 auto detect
-	{0x4004, 0x02},//	; BLC line number
-	{0x4005, 0x18},//	; BLC triggered by gain change
-	{0x4837, 0x11}, // MIPI global timing 16           
-	{0x503d, 0x00},//
-	{0x5000, 0xa7},//
-	{0x5001, 0x83},//
-	{0x5002, 0x80},//
-	{0x5003, 0x08},//
-	{0x3032, 0x00},//
-	{0x4000, 0x89},//
-	{0x5583, 0x40},//
-	{0x5584, 0x20},//
-	{0x3a00, 0x3c},//	; ae mode	
-	{0x4202, 0x00},//	; open mipi stream
-
-    {0x503d,0x80},// color bar test
-	//OV5640MIPIWriteExtraShutter(OV5640MIPISensor.PreviewExtraShutter);
-#endif
-
-#if 0
-        	{0x4202, 0x0f},//	; stop mipi stream
-        {0x300e, 0x45},//	; MIPI 2 lane
-		{0x3034, 0x18},// PLL, MIPI 8-bit mode
-		{0x3035, 0x21}, // PLL
-		{0x3036, 0x38}, // PLL
-		{0x3037, 0x13}, // PLL
-		{0x3108, 0x01}, // PLL
-		{0x3824, 0x01}, // PLL
-		{0x460c, 0x20}, // PLL
-		{0x3618, 0x00},//
-		{0x3600, 0x09},//
-		{0x3601, 0x43},//
-		{0x3708, 0x66},//
-		{0x3709, 0x12},//
-		{0x370c, 0xc3},//
-		{0x3800, 0x00}, // HS = 0
-		{0x3801, 0x00}, // HS
-		{0x3802, 0x00}, // VS = 250
-		{0x3803, 0x06}, // VS
-		{0x3804, 0x0a}, // HW = 2623
-		{0x3805, 0x3f},//	; HW
-		{0x3806, 0x07},//	; VH = 
-		{0x3807, 0x9d},//	; VH
-		{0x3808, 0x05},//	; DVPHO = 1280
-		{0x3809, 0x00},//	; DVPHO
-		{0x380a, 0x03},//	; DVPVO = 960
-		{0x380b, 0xc0},//	; DVPVO
-		{0x380c, 0x07},//	; HTS = 2160
-		{0x380d, 0x68},//	; HTS
-		{0x380e, 0x03},//	; VTS = 740
-		{0x380f, 0xd8},//	; VTS
-		{0x3810, 0x00}, // H OFF = 16
-		{0x3811, 0x10}, // H OFF
-		{0x3812, 0x00}, // V OFF = 4
-		{0x3813, 0x06},//	; V OFF
-		{0x3814, 0x31},//	; X INC
-		{0x3815, 0x31},//	; Y INC
-		{0x3820, 0x47},//	; flip off, V bin on
-		{0x3821, 0x07},//	; mirror on, H bin on
-		{0x4514, 0x00},
-		{0x3a00, 0x38},//	; ae mode	
-		{0x3a02, 0x03},//	; max exp 60 = 740
-		{0x3a03, 0xd8},//	; max exp 60
-		{0x3a08, 0x00},//	; B50 = 222
-		{0x3a09, 0x94},//	; B50
-		{0x3a0a, 0x00},//	; B60 = 185
-		{0x3a0b, 0x7b},//	; B60
-		{0x3a0e, 0x06},//	; max 50
-		{0x3a0d, 0x07},//	; max 60
-		{0x3a14, 0x03},//	; max exp 50 = 740
-		{0x3a15, 0xd8},//	; max exp 50
-		{0x3c07, 0x08},//	; 50/60 auto detect
-		{0x3c08, 0x00},//	; 50/60 auto detect
-		{0x3c09, 0x1c},//	; 50/60 auto detect
-		{0x4004, 0x02},//	; BLC line number
-		{0x4005, 0x18},//	; BLC triggered by gain change
-		{0x4837, 0x11}, // MIPI global timing 16           
-		{0x503d, 0x00},//
-		{0x5000, 0xa7},//
-		{0x5001, 0xa3},//
-		{0x5002, 0x80},//
-		{0x5003, 0x08},//
-		{0x3032, 0x00},//
-		{0x4000, 0x89},//
-		{0x350c, 0x00},//
-		{0x350d, 0x00},//
-        {0x5583, 0x40},//
-	{0x5584, 0x20},//
-	{0x3a00, 0x3c},//	; ae mode	
-	{0x4202, 0x00},//	; open mipi stream
-
-   //      {0x503d,0x80},// color bar test
-#endif
-
-#if 1
-    {0x3036,0x23},
-//  {0x3037,0x13},  //vco freq=24*70/3=560M
-//  {0x3034,0x1a},
-    {0x3035,0x41},
+    {0x3036,0x46},
+    {0x3037,0x13},  //vco freq=24*70/3=560M
+    {0x3034,0x1a},
+    {0x3035,0x21},
 //  {0x3108,0x01},  //sys_clk=560/1/2/2.5/2=56M, framerate=sys_clk/hts/vts=30
     {0x3824,0x02},
     {0x460C,0x22},  //dvp_pclk controlled by REG(0x3824)
@@ -1320,8 +1168,6 @@ static const struct regval_list ov5640_svga_regs[] = {
     {0x3006,0xc3},
     //enable AEC/AGC
     {0x3503,0x00},
-#endif
-
     ENDMARKER,
 };
 
@@ -1429,8 +1275,8 @@ static const struct ov5640_color_format ov5640_cfmts[] = {
 #define VGA_HEIGHT          480
 #define UXGA_WIDTH          1600
 #define UXGA_HEIGHT         1200
-#define SVGA_WIDTH          1280
-#define SVGA_HEIGHT         960
+#define SVGA_WIDTH          640//1280
+#define SVGA_HEIGHT         480//960
 #define OV5640_MAX_WIDTH    UXGA_WIDTH
 #define OV5640_MAX_HEIGHT   UXGA_HEIGHT
 #define AHEAD_LINE_NUM		15    //10ÐÐ = 50´ÎÑ­»·(OV5640)
@@ -1445,7 +1291,7 @@ static const struct ov5640_win_size ov5640_win_svga = {
     .name     = "SVGA",
     .width    = SVGA_WIDTH,
     .height   = SVGA_HEIGHT,
-    .win_regs = ov5640_preview_sxga_regs,
+    .win_regs = ov5640_svga_regs,  //ov5640_preview_sxga_regs,
     .frame_rate_array = frame_rate_svga,
 };
 
@@ -2195,6 +2041,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 
     printk("##%s: enable %d, initialized %d\n", __func__, enable, priv->initialized);
 
+#if 1
     //ov5640_video_probe(client);
     if (enable)
     {
@@ -2207,7 +2054,6 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
         if (!priv->initialized) {
            // if (!check_id(client))
             //    return -EINVAL;
-
             reg_write(client, 0x3103, 0x11);
             reg_write(client, 0x3008, 0x82);
             mdelay(5);
@@ -2224,10 +2070,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
 
             //this is very important,it must be CCIR656 enable,and after init ov5640 regs.
             printk("%s  line %d  ..CCIR656 CTRL00 enable .....\n",__func__,__LINE__);
-            reg_write(client, 0x4730,0x01);
-
-            printk("%s  line %d  ..clock from PLL input........\n",__func__,__LINE__);
-            reg_write(client, 0x3103,0x03);  //clock from PLL input
+            reg_write(client, 0x4730, 0x01);
 
             priv->initialized = true;
             printk(KERN_ERR "%s ov5640_write_array init regs\n", __func__);
@@ -2254,6 +2097,7 @@ static int ov5640_s_stream(struct v4l2_subdev *sd, int enable)
         ov5640_write_array(client, ov5640_disable_regs);
     }
 
+#endif
     printk("func %s succeed.\n", __func__);
     return ret;
 }

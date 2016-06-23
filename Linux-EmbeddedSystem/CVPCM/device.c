@@ -927,7 +927,7 @@ static struct nxp_v4l2_i2c_board_info sensor[] = {
     //   modified by yang and hoping
     {
          .board_info = &mipi_i2c_camera,
-         .i2c_adapter_id = 1,
+         .i2c_adapter_id = 2,
     },
     {
         .board_info = &dvp_i2c_camera,

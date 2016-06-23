@@ -90,12 +90,13 @@ int Camera::read_frame(unsigned char *image)
     printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     assert(buf.index < n_buffers);
 	
-    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
 
     memcpy(image,buffers[0].start,cap_image_size);
 
     if (-1 == xioctl(fd, VIDIOC_QBUF, &buf))
         errno_exit("VIDIOC_QBUF");
+
+    printf("************** %s succeed, line = %d\n", __FUNCTION__, __LINE__);
 
     return 1;
 }
@@ -294,24 +295,23 @@ bool Camera::init_device(void)
     //V4L2_PIX_FMT_YUYV ¡ª Packed format with 1/2 horizontal chroma resolution, also known as YUV 4:2:2
 
     //V4L2_PIX_FMT_YUYV;//V4L2_PIX_FMT_YUV420;//V4L2_PIX_FMT_YUYV;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;
-    //fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+
+    //fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_NV12;
+
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 
     //fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
 
-    {
-        printf("-#-#-#-#-#-#-#-#-#-#-#-#-#-\n");
-        printf("=====will set fmt to (%d, %d)--", fmt.fmt.pix.width,
-               fmt.fmt.pix.height);
-        if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
-            printf("V4L2_PIX_FMT_YUYV\n");
-        } else if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUV420) {
-            printf("V4L2_PIX_FMT_YUV420\n");
-        } else if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_NV12) {
-            printf("V4L2_PIX_FMT_NV12\n");
-        }
+    printf("-#-#-#-#-#-#-#-#-#-#-#-#-#-\n");
+    printf("=====will set fmt to (%d, %d)--", fmt.fmt.pix.width,
+           fmt.fmt.pix.height);
+    if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUYV) {
+        printf("V4L2_PIX_FMT_YUYV\n");
+    } else if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_YUV420) {
+        printf("V4L2_PIX_FMT_YUV420\n");
+    } else if (fmt.fmt.pix.pixelformat == V4L2_PIX_FMT_NV12) {
+        printf("V4L2_PIX_FMT_NV12\n");
     }
-	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
 
 	printf("************** %s, line = %d(camera_type = %d)\n", __FUNCTION__, __LINE__, c_camera_type);
 
@@ -324,26 +324,7 @@ bool Camera::init_device(void)
      	}
      }
 
-#if 0 
-    if(c_camera_type == 0)
-    {
-    	fmt.type = V4L2_BUF_TYPE_PRIVATE;
-    	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
-    	{
-        	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-        	return false;
-     	}
-    }
-	fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-#endif
-	// CLEAR (fmt);
-#if 0
-    if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt))
-    {
-	    printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
-        return false;
-     }
-#endif
+
 	printf("************** %s, line = %d\n", __FUNCTION__, __LINE__);
     printf("=====after set fmt\n");
     printf("    fmt.fmt.pix.width = %d\n", fmt.fmt.pix.width);
@@ -452,6 +433,6 @@ bool Camera::GetBuffer(unsigned char *image)
         fprintf(stderr, "select timeout\n");
         exit(EXIT_FAILURE);
     }
-    read_frame(image);
+    return read_frame(image);
 }
 

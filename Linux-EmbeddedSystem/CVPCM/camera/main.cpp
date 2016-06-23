@@ -3,10 +3,11 @@
 #include <string.h>
 #include <malloc.h>
 #include <time.h>
+#include <sys/time.h>
 #include "camera.h"
 
 #define DEV_NAME_LENGTH		50
-#define NUM_FRAM        1
+#define NUM_FRAM        200
 
 int main(int argc, char ** argv) {
     //char *dev_name = "/dev/video0";	//ITU
@@ -14,6 +15,7 @@ int main(int argc, char ** argv) {
     char *dev_name = NULL;
     FILE * outf = 0;
     unsigned int image_size;
+
 
     int camera_type = 0;//0:ITU, 1:UVC	
     int width=640;
@@ -66,6 +68,7 @@ int main(int argc, char ** argv) {
 
     clock_t starttime, endtime;
     double totaltime;
+    struct timeval t1, t2;
 
     camera = new Camera(dev_name, width, height, camera_type);
 
@@ -82,7 +85,8 @@ int main(int argc, char ** argv) {
     printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
 
 #if 1
-    starttime = clock();
+    //starttime = clock();
+    gettimeofday(&t1, NULL);
 
     //int frames=50;
     unsigned int writesize=0;
@@ -92,7 +96,7 @@ int main(int argc, char ** argv) {
     {
         if(!camera->GetBuffer(image))
         {
-            printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
+            printf("fun:%s error, line = %d\n", __FUNCTION__, __LINE__);
             break;
         }
 
@@ -104,9 +108,9 @@ int main(int argc, char ** argv) {
 
     printf("fun:%s, line = %d\n", __FUNCTION__, __LINE__);
 
-    endtime = clock();
-
-    totaltime = (double)( (endtime - starttime)/(double)CLOCKS_PER_SEC );
+    //endtime = clock();
+    gettimeofday(&t2, NULL);
+    totaltime = t2.tv_sec - t1.tv_sec + (t2.tv_usec - t1.tv_usec) / 1000000.0;
     printf("time :%f, rate :%f\n", totaltime, NUM_FRAM / totaltime);
 #endif
 

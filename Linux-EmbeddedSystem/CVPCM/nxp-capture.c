@@ -569,6 +569,7 @@ static void *_get_alloc_ctx(struct nxp_capture *me)
 static int _run(struct nxp_capture *me, void *child)
 {
     vmsg("%s: %p\n", __func__, child);
+    printk("## %s: %p\n", __func__, child);
     if (&me->vin_clipper == child)
         NXP_ATOMIC_SET_MASK(CAPTURE_CHILD_CLIPPER, &me->running_child_bitmap);
     else if (&me->decimator == child)

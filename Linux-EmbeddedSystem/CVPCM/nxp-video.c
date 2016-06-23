@@ -839,6 +839,8 @@ static int nxp_video_set_format(struct file *file, void *fh,
     int ret;
     int i;
 
+    printk("## func: %s, line: %d\n", __func__, __LINE__);
+
     if (me->vbq && (f->type != me->vbq->type)) {
         printk("%s: type is different(%d/%d)\n", __func__, f->type, me->vbq->type);
         pr_err("%s: type is different(%d/%d)\n", __func__, f->type, me->vbq->type);
@@ -899,6 +901,8 @@ static int nxp_video_set_format(struct file *file, void *fh,
     frame->height = pix->height;
 
     for (i = 0; i < format->num_planes; ++i) {
+        pix->plane_fmt[i].bytesperline = 1280;
+        pix->plane_fmt[i].sizeimage = 614400;
         frame->stride[i] = pix->plane_fmt[i].bytesperline;
         frame->size[i] = pix->plane_fmt[i].sizeimage;
     }

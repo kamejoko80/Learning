@@ -376,6 +376,7 @@ static int _hw_set_addr(struct nxp_vin_clipper *me, struct nxp_video_buffer *buf
 {
     struct nxp_capture *parent = nxp_vin_to_parent(me);
     int module = parent->get_module_num(parent);
+    struct v4l2_rect *c = &me->crop;
 
     vmsg("%s: addr(0x%x)\n", __func__, buf->dma_addr[0]);
     printk("## %s: addr(0x%x) in clipper.c \n", __func__, buf->dma_addr[0]);
@@ -386,7 +387,6 @@ static int _hw_set_addr(struct nxp_vin_clipper *me, struct nxp_video_buffer *buf
     _cr_addr = buf->dma_addr[2];
 
     if (me->platdata->is_mipi) {
-        struct v4l2_rect *c = &me->crop;
         vmsg("%s: set mipi vip format(0x%x), width %d, height %d, buf y 0x%x, buf cb 0x%x, buf cr 0x%x, stride 0 %d, stride 1 %d\n",
                 __func__,
                 NX_VIP_FORMAT_422,
@@ -403,9 +403,8 @@ static int _hw_set_addr(struct nxp_vin_clipper *me, struct nxp_video_buffer *buf
             vmsg("%s: clipper bufs 0x%x, stride %d\n",
                 __func__, buf->dma_addr[0], buf->stride[0]);
             /* TODO: how can s5p6818 do this? */
-#if defined(CONFIG_ARCH_S5P4418)
-            NX_VIP_SetClipperAddrYUYV(module, buf->dma_addr[0], buf->stride[0]>>1);
-#endif
+            NX_VIP_SetClipperAddr(module, NX_VIP_FORMAT_YUYV, c->width - c->left, 
+                           c->height - c->top, _lu_addr, _cb_addr, _cr_addr, buf->stride[0], buf->stride[1]);
         } else {
             u32 nx_format = _convert_to_nxp_vip_format(me->format[1].code);
             struct v4l2_rect *c = &me->crop;
@@ -1011,7 +1010,7 @@ static int nxp_vin_clipper_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *c
     struct nxp_vin_clipper *me;
     struct v4l2_subdev *remote_source;
     int ret = 0;
-    
+
     me = v4l2_get_subdevdata(sd);
 	if (!me) {
         pr_err("%s error: me is NULL\n", __func__);
@@ -1071,12 +1070,13 @@ static int nxp_vin_clipper_s_stream(struct v4l2_subdev *sd, int enable)
                 }
             }
         }
-        
+
         _configure(me, enable);
         if (is_host_video) {
             ret = _register_irq_handler(me);
             if (ret < 0) {
                 pr_err("%s: failed to _register_irq_handler\n", __func__);
+                printk("%s: failed to _register_irq_handler\n", __func__);
                 return ret;
             }
             _update_next_buffer(me);
@@ -1224,6 +1224,8 @@ static int nxp_vin_clipper_set_fmt(struct v4l2_subdev *sd,
     struct v4l2_mbus_framefmt *__format =
         _get_pad_format(me, fh, format->pad, format->which);
     struct nxp_vin_platformdata *info = me->platdata;
+    struct v4l2_subdev *remote_source;
+    int ret;
     info->h_active = format->format.width;
     info->v_active = format->format.height;
     vmsg("%s: h_active(%d), v_active(%d), code(0x%x)\n", __func__, info->h_active, info->v_active, format->format.code);
@@ -1233,6 +1235,8 @@ static int nxp_vin_clipper_set_fmt(struct v4l2_subdev *sd,
         if (!_find_format(supported_input_formats,
                     ARRAY_SIZE(supported_input_formats), format->format.code)) {
             pr_err("%s: not supported input format(0x%x)\n", __func__,
+                    format->format.code);
+            printk("## %s: not supported input format(0x%x)\n", __func__,
                     format->format.code);
             return -EINVAL;
         }
@@ -1260,7 +1264,15 @@ static int nxp_vin_clipper_set_fmt(struct v4l2_subdev *sd,
         return -EINVAL;
     }
 
+    remote_source = _get_remote_source_subdev(me);
+    ret = v4l2_subdev_call(remote_source, video, s_mbus_fmt, __format);
+    if(ret < 0)
+    {
+        printk("## call s_mbus_fmt failed in %s", __func__);
+    }
+
     vmsg("%s: success!!!\n", __func__);
+    printk("## %s: success!!!\n", __func__);
     return 0;
 }
 

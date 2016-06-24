@@ -39,7 +39,16 @@ it sets up the interrupt handler by `request_irq()`.
 The instances of clipper, decimator and csi is similar, 
 so we just introduce clipper and sensor parts. 
 
+The most important function in the initialization of clipper is `_init_entities()`, 
+in which we instantialize the structure `nxp_vin_clipper` and setup the subdevice and video node. 
+Clipper subdevice is initialized by `v4l2_subdev_init()` with the subdev operations structure. 
+After setting up the subdev data, video node is created and linked to the subdev by 
+`media_entity_init()`, `create_nxp_video()` and `media_entity_create_link()`. 
+Clipper is register by `v4l2_device_register_subdev()` and `register_nxp_video()`, 
+which register clipper subdevice and the video node for it.
 
+Similarly, sensor subdevice is registered by `v4l2_i2c_new_subdev_board()`, which calls the sensor driver register. 
+The driver contains `probe()` and initialize the driver structure for the camera.
 
 
 

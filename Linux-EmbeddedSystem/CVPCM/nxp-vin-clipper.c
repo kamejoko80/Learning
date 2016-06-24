@@ -379,7 +379,6 @@ static int _hw_set_addr(struct nxp_vin_clipper *me, struct nxp_video_buffer *buf
     struct v4l2_rect *c = &me->crop;
 
     vmsg("%s: addr(0x%x)\n", __func__, buf->dma_addr[0]);
-    printk("## %s: addr(0x%x) in clipper.c \n", __func__, buf->dma_addr[0]);
 
     /* for debugging */
     _lu_addr = buf->dma_addr[0];

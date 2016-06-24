@@ -4,9 +4,10 @@
 - [x] Figure out how `video_register_device()` work,
 - [x] To find the ov5640 device in `/dev/video*` to prove it.
 - [x] Try to link ov5640 subdev to Clipper host.
-- [ ] Try to fix nxp-video.c
-- [ ] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
-- [ ] Read video stream from ov5640 dvp/mipi.
+- [x] Try to fix nxp-video.c
+- [x] Set the ov5640 dvp/mipi regs to capture a suitable video shot.
+- [x] Read video stream from ov5640 dvp/mipi.
+- [x] Get image frame in YUYV format.
 
 ### Framework
 When Linux kernel booting, `nxp_v4l2_driver` defined in nxp-v4l2.c
@@ -30,7 +31,16 @@ clipper, decimator and csi --- by `nxp_vin_clipper_init()`, `nxp_decimator_init(
 and `nxp_csi_init()` respectively. Finaly, it links the csi(source) to clipper(sink), 
 clipper(source) to decimator(sink). 
 
-`register_nxp_capture()` 
+`register_nxp_capture()` register clipper, decimator and csi by `nxp_vin_clipper_register()`, 
+`nxp_decimator_register()`, `nxp_csi_register()` respectively. And register our camera by 
+`_register_sensor()`. Then, it links clipper and decimator to their video nodes. Finaly, 
+it sets up the interrupt handler by `request_irq()`.
+
+The instances of clipper, decimator and csi is similar, 
+so we just introduce clipper and sensor parts. 
+
+
+
 
 
 

@@ -786,15 +786,9 @@ static void camera_common_vin_setup_io(int module, bool force)
             { PAD_GPIO_D + 30, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_D + 31, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_E +  0, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_E +  1, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_E +  2, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_E +  3, NX_GPIO_PADFUNC_1 },
-#else
-             /* VCLK, HSYNC, VSYNC */
-            { PAD_GPIO_A + 28, NX_GPIO_PADFUNC_1 },
-            { PAD_GPIO_E + 13, NX_GPIO_PADFUNC_2 },
-            { PAD_GPIO_E +  7, NX_GPIO_PADFUNC_2 },
 
             { PAD_GPIO_A + 30, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  0, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_B +  2, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  4, NX_GPIO_PADFUNC_1 },
-            //camera \D3\EB usb \D2\FD\BDų\E5ͻ
             { PAD_GPIO_B +  6, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B +  8, NX_GPIO_PADFUNC_1 },
             { PAD_GPIO_B +  9, NX_GPIO_PADFUNC_1 }, { PAD_GPIO_B + 10, NX_GPIO_PADFUNC_1 },
 #endif
@@ -988,6 +982,41 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
     #endif
 
     #if 1
+    {
+        // dvp_camera 656 interface 
+        .module = 1,
+        .sensor = &sensor[0],  //  sensor[0]:mipi  sensor[1] : dvp;
+        .type = NXP_CAPTURE_INF_PARALLEL,
+        .parallel = {
+            .is_mipi        = false,
+            .external_sync  = false,    //if external_sync is used(this means that value is true), 601 format else 656 format
+            .h_active       = 640,  //1280
+            .h_frontporch   = 0,
+            .h_syncwidth    = 0,
+            .h_backporch    = 2,
+            .v_active       = 480,  //960
+            .v_frontporch   = 0,
+            .v_syncwidth    = 0,
+            .v_backporch    = 13,
+            .clock_invert   = false, 
+            .port           = 0,
+            .data_order     = NXP_VIN_Y0CBY1CR,//NXP_VIN_CRY1CBY0,//NXP_VIN_CBY0CRY1,
+            .interlace      = false,
+            .clk_rate       = 24000000,
+            .late_power_down = true,
+            .power_enable   = dvp_camera_power_enable,// 
+            .power_state_changed = dvp_camera_power_state_changed,//
+            .set_clock      = camera_common_set_clock,
+            .setup_io       = camera_common_vin_setup_io,
+        },
+        .deci = {
+            .start_delay_ms = 0,
+            .stop_delay_ms  = 0,
+        },
+    },
+    #endif
+
+    #if 0
     {
 
         /* mipi_camera 656 interface */

@@ -7,7 +7,7 @@
 #include "camera.h"
 
 #define DEV_NAME_LENGTH		50
-#define NUM_FRAM        200
+#define NUM_FRAM        5
 
 int main(int argc, char ** argv) {
     //char *dev_name = "/dev/video0";	//ITU

@@ -2300,21 +2300,87 @@ static void ov5640_priv_init(struct ov5640_priv * priv)
     priv->win = &ov5640_win_svga;
 }
 
+//#define CAMERA_RS (PAD_GPIO_A + 1)
+//#define CAMERA_PD (PAD_GPIO_A + 2)
+#define CAMERA_RS CAMERA_RST
+#define CAMERA_PD CAMERA_PD0
+
+
+
 static int ov5640_video_probe(struct i2c_client *client)
 {
 	int ret;
 	u8 id_high, id_low;
 	u16 id;
 //  added by yang and hoping 
-        
+
 // power up
     struct regulator *camera_power_1p5V = NULL;
     struct regulator *camera_power_2p8V = NULL;
 
-    gpio_request(CAMERA_PD0,"CAMERA_PD0");
-    gpio_request(CAMERA_RST,"CAMERA_RST");
+    //gpio_request(CAMERA_PD0,"CAMERA_PD0");
+    //gpio_request(CAMERA_RST,"CAMERA_RST");
+    gpio_request(CAMERA_RS, "CAMERA_RST");
+    gpio_request(CAMERA_PD, "CAMERA_PD0");
+    gpio_direction_output(CAMERA_RS, 0);
+    gpio_direction_output(CAMERA_PD, 1);
+    printk("\n\n## DELAY 5000 ms\n\n");
+    mdelay(5000);
 
-    gpio_direction_output(CAMERA_PD0, 1);
+    mdelay(50);
+#if 0
+    gpio_request(PAD_GPIO_A + 30, "GPIO_TEST_D0");
+    gpio_request(PAD_GPIO_B + 0, "GPIO_TEST_D1");
+    gpio_request(PAD_GPIO_B + 2, "GPIO_TEST_D2");
+    gpio_request(PAD_GPIO_B + 4, "GPIO_TEST_D3");
+    gpio_request(PAD_GPIO_B + 6, "GPIO_TEST_D4");
+    gpio_request(PAD_GPIO_B + 8, "GPIO_TEST_D5");
+    gpio_request(PAD_GPIO_B + 9, "GPIO_TEST_D6");
+    gpio_request(PAD_GPIO_B + 10, "GPIO_TEST_D7");
+
+    gpio_direction_output(PAD_GPIO_A + 30, 0);
+    gpio_direction_output(PAD_GPIO_B + 0, 0);
+    gpio_direction_output(PAD_GPIO_B + 2, 0);
+    gpio_direction_output(PAD_GPIO_B + 4, 0);
+    gpio_direction_output(PAD_GPIO_B + 6, 0);
+    gpio_direction_output(PAD_GPIO_B + 8, 0);
+    gpio_direction_output(PAD_GPIO_B + 9, 0);
+    gpio_direction_output(PAD_GPIO_B + 10, 0);
+    printk("## DELAY 5000 ms");
+    mdelay(5000);
+    int i;
+    while(1)
+    {
+        gpio_direction_output(PAD_GPIO_A + 30, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 0, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 2, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 4, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 6, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 8, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 9, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_B + 10, 1);
+        mdelay(1);
+        gpio_direction_output(PAD_GPIO_A + 30, 0);
+        gpio_direction_output(PAD_GPIO_B + 0, 0);
+        gpio_direction_output(PAD_GPIO_B + 2, 0);
+        gpio_direction_output(PAD_GPIO_B + 4, 0);
+        gpio_direction_output(PAD_GPIO_B + 6, 0);
+        gpio_direction_output(PAD_GPIO_B + 8, 0);
+        gpio_direction_output(PAD_GPIO_B + 9, 0);
+        gpio_direction_output(PAD_GPIO_B + 10, 0);
+        mdelay(5);
+    }
+#endif
+
+
+    gpio_direction_output(CAMERA_PD, 1);
     mdelay(5);
 
     camera_power_2p8V = regulator_get(NULL,"vcam1_2.8V");
@@ -2332,28 +2398,16 @@ static int ov5640_video_probe(struct i2c_client *client)
 
 // reset
         mdelay(10);
-        gpio_direction_output(CAMERA_PD0, 0);
+        gpio_direction_output(CAMERA_PD, 0);
 // set CLK
         nxp_soc_pwm_set_frequency(1,24000000,50); //24MHz,  50% duty cycle
         mdelay(5);
-        gpio_direction_output(CAMERA_RST, 1);
+        gpio_direction_output(CAMERA_RS, 1);
         mdelay(30);
     //}
 
-#if 0
-    // write regs test
-    reg_write(client, 0x3103, 0x11);
-    reg_write(client, 0x3008, 0x82);
-    //gpio_direction_output(CAMERA_RST, 0);
-    mdelay(20);
-    reg_write(client, 0x3008, 0x02);
-    //gpio_direction_output(CAMERA_RST, 1);
-    mdelay(50);
-    reg_write(client, 0x3103, 0x03);
-#endif
-
-    gpio_free(CAMERA_PD0);
-    gpio_free(CAMERA_RST);
+    gpio_free(CAMERA_PD);
+    gpio_free(CAMERA_RS);
     regulator_put(camera_power_2p8V);
     regulator_put(camera_power_1p5V);
 

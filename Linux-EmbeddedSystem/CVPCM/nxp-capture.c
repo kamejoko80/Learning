@@ -569,7 +569,6 @@ static void *_get_alloc_ctx(struct nxp_capture *me)
 static int _run(struct nxp_capture *me, void *child)
 {
     vmsg("%s: %p\n", __func__, child);
-    printk("## %s: %p\n", __func__, child);
     if (&me->vin_clipper == child)
         NXP_ATOMIC_SET_MASK(CAPTURE_CHILD_CLIPPER, &me->running_child_bitmap);
     else if (&me->decimator == child)
@@ -708,10 +707,8 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
             return NULL;
         }
 
-        //printk(KERN_ALERT "##v4l2_i2c_new_subdev begins\n");
         sensor = v4l2_i2c_new_subdev_board(me->get_v4l2_device(me),
                 adapter, board_info->board_info, NULL);
-        //printk(KERN_ALERT "##v4l2_i2c_new_subdev ends\n");
         if (!sensor) {
             pr_err("%s: unable to register subdev %s\n",
                     __func__, board_info->board_info->type);
@@ -742,8 +739,7 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
     ret = media_entity_create_link(&sensor->entity, 0,
             input, pad, flags);
     if (ret < 0) {
-        //pr_err("%s: failed to media_entity_create_link()\n", __func__);
-        printk("### %s: failed to media_entity_create_link()\n", __func__);
+        pr_err("%s: failed to media_entity_create_link()\n", __func__);
         return NULL;
     }
 
@@ -759,9 +755,7 @@ static struct v4l2_subdev *_register_sensor(struct nxp_capture *me,
     
     link = media_entity_find_link(sensor->entity.pads, &input->pads[NXP_VIN_PAD_SINK]);
     if (NULL != link)
-        printk(KERN_ALERT "## media_entity_find_link success\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    printk(KERN_ALERT "## return %d from media_entity_setup_link\n", ret);
     
     return sensor;
 }
@@ -802,14 +796,12 @@ static int create_sensor_sysfs(int module)
     if (!sysfs_created) {
         struct kobject *kobj = kobject_create_and_add("camera sensor", &platform_bus.kobj);
         if (!kobj) {
-            printk("%s: failed to kobject_create_and_add for camera sensor\n", __func__);
             pr_err("%s: failed to kobject_create_and_add for camera sensor\n", __func__);
             return -EINVAL;
         }
 
         ret = sysfs_create_group(kobj, &attr_group);
         if (ret) {
-            printk("%s: failed to sysfs_create_group for camera sensor\n", __func__);
             pr_err("%s: failed to sysfs_create_group for camera sensor\n", __func__);
             kobject_del(kobj);
             return -EINVAL;
@@ -888,10 +880,8 @@ struct nxp_capture *create_nxp_capture(int index,
 #endif
 
     ret = nxp_vin_clipper_init(&me->vin_clipper, &pdata->parallel);
-    printk(KERN_ALERT "##%s: nxp_vin_clipper_init()\n", __func__);
     if (ret < 0) {
-        //pr_err("%s: failed to nxp_vin_clipper_init()\n", __func__);
-        printk(KERN_ALERT "##%s: failed to nxp_vin_clipper_init()\n", __func__);
+        pr_err("%s: failed to nxp_vin_clipper_init()\n", __func__);
         goto error_vin;
     }
 
@@ -1017,7 +1007,6 @@ int register_nxp_capture(struct nxp_capture *me)
     /* find sensor subdev */
     
     sensor = _register_sensor(me, me->platdata->sensor);
-    printk(KERN_ALERT"### sensor subdev registration \n");
     if (NULL == sensor) {
         pr_err("%s: can't register sensor subdev\n", __func__);
         goto error_sensor;
@@ -1028,37 +1017,17 @@ int register_nxp_capture(struct nxp_capture *me)
     link = media_entity_find_link(
             &me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_DECIMATOR],
             &me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SINK]);
-    if (NULL == link)
-        printk(KERN_ALERT "## fail to find link from clipper to decimator.\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    if (ret != 0)
-        printk(KERN_ALERT "## fail to setup link from clipper to decimator.\n");
     
     link = media_entity_find_link(
             &(me->vin_clipper.subdev.entity.pads[NXP_VIN_PAD_SOURCE_MEM]),
             me->vin_clipper.video->pads);
-    if (NULL == link)
-        printk(KERN_ALERT "## fail to find link from clipper to video node.\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    if (ret != 0)
-        printk(KERN_ALERT "## fail to setup link from clipper to video node.\n");
     
     link = media_entity_find_link(
             &(me->decimator.subdev.entity.pads[NXP_DECIMATOR_PAD_SOURCE_MEM]),
             me->decimator.video->pads);
-    if (NULL == link)
-        printk(KERN_ALERT "## fail to find link from decimator to video node.\n");
     ret = media_entity_setup_link(link, MEDIA_LNK_FL_ENABLED);
-    if (ret != 0)
-        printk(KERN_ALERT "## fail to setup link from decimator to video node.\n");
-#if 0
-    struct v4l2_device *vdev;
-    vdev = me->get_v4l2_device(me);
-    // There are 11 control ops in OV5640
-    v4l2_ctrl_handler_init(&vdev->ctrl_handler, 11);
-	v4l2_ctrl_add_handler(&vdev->ctrl_handler, sensor->ctrl_handler);
-#endif
-
 
     // psw0523 fix for urbetter
     /* ret = request_irq(me->irq, &_irq_handler, IRQF_DISABLED, "nxp-capture", me); */

@@ -101,3 +101,19 @@ Driver Structure: ![OV5640_DRIVER](https://lh3.googleusercontent.com/7jsnxkgSMBU
 >      |  
 >      \-filehandle instances  
 
+
+# Make menuconfig
+>  |
+>  +-Device Drivers
+>      |
+>      +-Multimedia support
+>          |
+>          +-Nexell V4L2 Devices
+>              |
+>              +-Nexell Video capture interface
+>                  |
+>                  |
+
+
+
+

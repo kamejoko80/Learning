@@ -977,7 +977,7 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
     },
     #endif
 
-    #if 1
+    #if 0
     {
         // dvp_camera 656 interface 
         .module = 1,
@@ -1012,7 +1012,7 @@ static struct nxp_capture_platformdata capture_plat_data[] = {
     },
     #endif
 
-    #if 0
+    #if 1
     {
 
         /* mipi_camera 656 interface */

@@ -50,8 +50,17 @@ which register clipper subdevice and the video node for it.
 Similarly, sensor subdevice is registered by `v4l2_i2c_new_subdev_board()`, which calls the sensor driver register. 
 The driver contains `probe()` and initialize the driver structure for the camera.
 
+The probe() function init priv structure and create the media entity. We also add `ov5640_video_prove()` in it
+to put on the power for camera and check the i2c to see if it can work.
 
+Our application program is in `./camera/`. It contains Camera class for utilzing the video node and ioctl command.
+In `init_device()`, we set the format and init the mmap.
+In `start_capturing()`, we setup the frame buffer and call the `STREAMON` ioctl.
+`STREAMON` will call the `streamon` instance function in `nxp-video.c` and then the instance function
+refer to the `s_stream()` function in `nxp-vin-clipper.c` and then the `s_stream()` in `ov5640_dvp.c`.
+The `s_stream()` function will write the regs to the camera to set up it.
 
+The registers setting cound see more in the datasheet of OV5640.
 
 ### File list
 * axp22-cfg.h  

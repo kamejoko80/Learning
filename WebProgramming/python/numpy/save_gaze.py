@@ -74,9 +74,9 @@ if __name__ == '__main__':
                     rv = target_head - re
                     lv = target_head - le
                     ryaw = np.arctan(rv[0] / rv[2]) * 180 / 3.1415926
-                    rpitch = - np.arctan(rv[1] / rv[2]) * 180 / 3.1415926
+                    rpitch = np.arcsin(rv[1] / np.linalg.norm(rv)) * 180 / 3.1415926
                     lyaw = np.arctan(lv[0] / lv[2]) * 180 / 3.1415926
-                    lpitch = - np.arctan(lv[1] / lv[2]) * 180 / 3.1415926
+                    lpitch = np.arcsin(lv[1] / np.linalg.norm(lv)) * 180 / 3.1415926
 
                     ## write result
                     log_file.write(img_name+' '+str(rpitch[0])+' '+str(ryaw[0])+' '+str(lpitch[0])+' '+str(lyaw[0])+'\n')

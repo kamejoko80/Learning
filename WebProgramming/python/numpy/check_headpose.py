@@ -16,10 +16,11 @@ print folder
 items_file = open(args.path)
 bins = []
 data = []
-
 pitch_list = []
 yaw_list = []
 roll_list = []
+
+step = 5 #degree
 
 for l in items_file:
     sp = l.split(' ')
@@ -36,21 +37,14 @@ for l in items_file:
     roll_list.append(roll)
     data.append((pitch, yaw, roll, img_name))
 
-#H, [xedges, yedges ,zedges] = np.histogramdd((pitch_list, yaw_list, roll_list), bins=(pitch_binNum,yaw_binNum,roll_binNum))
-
-#print xedges
-#print yedges
-xstep = xedges[1] - xedges[0]
-ystep = yedges[1] - yedges[0]
-zstep = zedges[1] - zedges[0]
-print xstep,ystep,zstep
-
 #plt.hist2d(yaw_list, pitch_list, bins=(yaw_binNum, pitch_binNum))
 #plt.colorbar()
 #plt.show()
-pitch_binNum = 10
-yaw_binNum = 20
-roll_binNum = 10
+pitch_binNum = int((max(pitch_list) - min(pitch_list)) / step)
+yaw_binNum = int((max(yaw_list) - min(yaw_list)) / step)
+roll_binNum = int((max(roll_list) - min(roll_list)) / step)
+
+H, [xedges, yedges ,zedges] = np.histogramdd((pitch_list, yaw_list, roll_list), bins=(pitch_binNum,yaw_binNum,roll_binNum))
 
 for i in range(0, pitch_binNum):
     bins.append([])
@@ -62,9 +56,9 @@ for d in data:
     pitch = d[0]
     yaw = d[1]
     roll = d[2]
-    binx = int((pitch - xedges[0]) / xstep)
-    biny = int((yaw - yedges[0]) / ystep)
-    binz = int((roll - zedges[0]) / zstep)
+    binx = int((pitch - xedges[0]) / step)
+    biny = int((yaw - yedges[0]) / step)
+    binz = int((roll - zedges[0]) / step)
     binx = binx - 1 if binx == pitch_binNum else binx	
     biny = biny - 1 if biny == yaw_binNum else biny	
     binz = binz - 1 if binz == roll_binNum else binz	
@@ -73,18 +67,18 @@ for d in data:
     except IndexError:
         print "ERROR: bin index out of range."
         print int(binx), int(biny), int(binz)
-#print bins
+print bins
 
 for i in range(0, pitch_binNum):
     for j in range(0, yaw_binNum):
         for k in range(0, roll_binNum):
-            pstr = str(int(i * xstep + xedges[0]))[:5]
-            ystr = str(int(j * ystep + yedges[0]))[:5]
-            rstr = str(int(k * zstep + zedges[0]))[:5]
+            pstr = str(int(i * step + xedges[0]))[:5]
+            ystr = str(int(j * step + yedges[0]))[:5]
+            rstr = str(int(k * step + zedges[0]))[:5]
             directory = folder+'/headpose_bins/p'+pstr+'y'+ystr+'r'+rstr
             #directory = folder+'/lefteye_bins/p'+pstr+'y'+ystr+'r'+rstr
-#            continue
-            if len(bins[i][j][k]) :
+            continue
+            if len(bins[i][j][k]):
                 print pstr, ystr,rstr, len(bins[i][j][k])
                 if not os.path.exists(directory):
                     os.makedirs(directory)
@@ -92,16 +86,3 @@ for i in range(0, pitch_binNum):
                     copyfile(folder + '/head/' + f, directory + '/' + f)
                     #copyfile(folder + '/eyes/left_' + f, directory + '/' + f)
 
-# while True:
-#     bin_id = raw_input('bin:')
-#     bin_id = bin_id.split(' ')
-#     print bin_id
-#     i = int(bin_id[0])
-#     j = int(bin_id[1])
-#     bin = bins[i][j]
-#     if i < 0:
-#         break
-#     for f in bin:
-#         print folder+f
-#         cv2.imshow("img",cv2.imread(folder+'/left/'+f))
-#         cv2.waitKey(0)

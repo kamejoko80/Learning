@@ -64,7 +64,7 @@ def normalizeData(img, face, hr, ht, cam, dist):
         img_warped = cv2.equalizeHist(img_warped)
 
         ## ---------- normalize rotation ----------
-        cnvMat = np.dot(scaleMat, rotMat)
+        cnvMat = rotMat
         hRnew = np.dot(cnvMat, hR)
         hrnew = cv2.Rodrigues(hRnew)[0]
         htnew = np.dot(cnvMat, et)
